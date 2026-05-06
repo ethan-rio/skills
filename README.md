@@ -35,6 +35,13 @@ agents).
 - **[drawio-aws-diagrams](./skills/engineering/drawio-aws-diagrams/SKILL.md)** — Author professional AWS architecture diagrams as `.drawio` XML on the first attempt.
 - **[prove-it](./skills/engineering/prove-it/SKILL.md)** — Test your understanding of the current project through adaptive questioning.
 
+_Vendored from [mattpocock/skills](https://github.com/mattpocock/skills):_
+
+- **[diagnose](./skills/engineering/diagnose/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions.
+- **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Find deepening opportunities in a codebase; consolidate tightly-coupled modules.
+- **[tdd](./skills/engineering/tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop.
+- **[zoom-out](./skills/engineering/zoom-out/SKILL.md)** — Tell the agent to zoom out and give broader context on an unfamiliar section of code.
+
 ### Learning
 
 - **[book-2-site](./skills/learning/book-2-site/SKILL.md)** — Convert a book into an interactive learning website.
@@ -49,9 +56,11 @@ agents).
 
 ## Credits
 
-The `productivity/` bucket is vendored from [mattpocock/skills](https://github.com/mattpocock/skills)
-(MIT). Modifications, if any, are tracked in this repo's git history. See
-[`LICENSE`](./LICENSE) for the full third-party notice.
+Several skills in `engineering/` and all of `productivity/` are vendored from
+[mattpocock/skills](https://github.com/mattpocock/skills) (MIT). Each vendored
+`SKILL.md` carries an attribution comment at the top. Modifications, if any,
+are tracked in this repo's git history. See [`LICENSE`](./LICENSE) for the
+full third-party notice.
 
 ## License
 
