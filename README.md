@@ -56,7 +56,7 @@ _Vendored from [mattpocock/skills](https://github.com/mattpocock/skills):_
 
 ## Credits
 
-Several skills in `engineering/` and all of `productivity/` are vendored from
+Several skills in `engineering/` and `productivity/` are vendored from
 [mattpocock/skills](https://github.com/mattpocock/skills) (MIT). Each vendored
 `SKILL.md` carries an attribution comment at the top. Modifications, if any,
 are tracked in this repo's git history. See [`LICENSE`](./LICENSE) for the
