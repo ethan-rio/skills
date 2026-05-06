@@ -1,6 +1,10 @@
 # Local planning docs — not pushed to remote
 docs/plans/
 
+# Local scratch / experiments — not pushed to remote
+local/
+!local/.gitkeep
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
