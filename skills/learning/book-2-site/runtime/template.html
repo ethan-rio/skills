@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>__BOOK_TITLE__ — Interactive Study Guide</title>
+<link rel="stylesheet" href="../_runtime/styles.css?v=1"/>
+<script>
+  (function(){
+    var t = localStorage.getItem('b2s-theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">__BRAND_MARK__</div>
+      <div>
+        <div class="brand-title">__BOOK_TITLE_SHORT__</div>
+        <div class="brand-sub">Interactive Study Guide</div>
+      </div>
+    </div>
+    <nav id="toc"></nav>
+    <div class="progress-box">
+      <div class="progress-label">Progress <span id="progress-pct">0%</span></div>
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+      <button class="reset-btn" id="reset-progress">Reset progress</button>
+    </div>
+    <div class="modes" id="mode-buttons"></div>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+      <span class="theme-icon" id="theme-icon">🌙</span>
+      <span class="theme-label" id="theme-label">Dark</span>
+    </button>
+  </aside>
+  <main id="main">
+    <header id="hero"><div class="hero-inner" id="hero-content"></div></header>
+    <section id="view-root"></section>
+  </main>
+</div>
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-inner">
+    <button class="modal-close" id="modal-close">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+<script src="./data.js?v=1"></script>
+<script src="./quotes.js?v=1"></script>
+<script src="../_runtime/app.js?v=1"></script>
+</body>
+</html>
