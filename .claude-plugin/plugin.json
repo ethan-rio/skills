@@ -11,6 +11,7 @@
     "./skills/productivity/grill-me",
     "./skills/productivity/grill-with-docs",
     "./skills/productivity/to-prd",
-    "./skills/productivity/write-a-skill"
+    "./skills/productivity/write-a-skill",
+    "./skills/personal/hello-dummy"
   ]
 }
