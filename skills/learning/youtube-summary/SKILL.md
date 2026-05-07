@@ -53,16 +53,25 @@ CLEAN_VTT_PY="<absolute-path-to-scripts/clean_vtt.py>"
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
-# Download auto-subs (en* fallbacks included) + metadata
+# Download subs + auto-subs. Prefer English (manual or auto-translated), but fall
+# back to any available track so non-English videos still work. Claude can read
+# most languages — surface the language in the summary if it isn't English.
 yt-dlp \
-  --write-auto-sub --sub-lang "en.*,en" \
+  --write-sub --write-auto-sub --sub-lang "en.*,en,all" \
   --skip-download \
   --output "$TMPDIR/%(title)s.%(ext)s" \
   "$URL" 2>&1 | tail -5
 
-# Pick the processed en.vtt, not the raw en-orig.vtt
+# Prefer processed en.vtt, then any en variant, then the original-language track,
+# then anything. Skip raw en-orig.vtt (untranslated auto track in source lang
+# tagged as English) when a cleaner en.vtt exists.
 VTT=$(find "$TMPDIR" -name '*.en.vtt' ! -name '*.en-orig.vtt' | head -1)
+[ -z "$VTT" ] && VTT=$(find "$TMPDIR" -name '*.en*.vtt' | head -1)
+[ -z "$VTT" ] && VTT=$(find "$TMPDIR" -name '*-orig.vtt' | head -1)
 [ -z "$VTT" ] && VTT=$(find "$TMPDIR" -name '*.vtt' | head -1)
+
+# Extract language tag from the filename (e.g. "Title.vi.vtt" -> "vi").
+SUB_LANG=$(basename "$VTT" .vtt | awk -F. '{print $NF}')
 
 if [ -z "$VTT" ]; then
   echo "ERROR: no subtitles found. Video may not have captions." >&2
@@ -87,7 +96,8 @@ mkdir -p "$OUT_DIR"
   printf '# %s -- Transcript\n\n' "$TITLE"
   printf '**Source:** %s\n' "$URL"
   printf '**Channel:** %s\n' "$CHANNEL"
-  printf '**Duration:** %s\n\n---\n\n' "$DURATION"
+  printf '**Duration:** %s\n' "$DURATION"
+  printf '**Subtitle language:** %s\n\n---\n\n' "$SUB_LANG"
   cat "$TMPDIR/cleaned.txt"
 } > "$OUT_DIR/transcript.md"
 
@@ -97,9 +107,10 @@ echo "TITLE=$TITLE"
 echo "CHANNEL=$CHANNEL"
 echo "DURATION=$DURATION"
 echo "CLEANED=$TMPDIR/cleaned.txt"
+echo "SUB_LANG=$SUB_LANG"
 ```
 
-Capture `OUT_DIR`, `TITLE`, `CHANNEL`, `DURATION`, and the cleaned-transcript path from the stdout of that call.
+Capture `OUT_DIR`, `TITLE`, `CHANNEL`, `DURATION`, `SUB_LANG`, and the cleaned-transcript path from the stdout of that call.
 
 Error cases (fail fast with clear message):
 - Output contains `CERTIFICATE_VERIFY_FAILED` → corporate proxy/ZScaler. Suggest `--no-check-certificates` flag or adding it to `~/.config/yt-dlp/config`.
@@ -148,5 +159,5 @@ If `$ARGUMENTS` contains multiple URLs, process them sequentially. Each video ge
 ## Known bounds
 
 - Videos up to ~3 hours (~30k words cleaned transcript) fit comfortably in context.
-- Non-English videos: the `en.*,en` sub-lang fallback catches `en-US`, `en-GB`, auto-translated English. If only non-English subs exist, surface that clearly — do not attempt to summarise a language you cannot read.
+- Non-English videos: the sub-lang filter prefers English (manual or auto-translated) but falls back to any available track (`all`). `SUB_LANG` on stdout tells you which language was picked. Write the summary in English regardless of source language, and note the source language in the header (e.g. `**Subtitle language:** vi`). If the language is one Claude cannot read confidently, stop and tell the user rather than guessing.
 - Re-running the skill on the same URL in the same `$PWD` overwrites the previous `summary.md` and `transcript.md` for that title. That's intentional — it lets you regenerate summaries as your reading priorities change.
