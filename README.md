@@ -47,7 +47,11 @@ _Vendored from [mattpocock/skills](https://github.com/mattpocock/skills):_
 - **[book-2-site](./skills/learning/book-2-site/SKILL.md)** — Convert a book into an interactive learning website.
 - **[youtube-summary](./skills/learning/youtube-summary/SKILL.md)** — Summarise a YouTube video from its transcript into a structured markdown note.
 
-### Productivity _(vendored from [mattpocock/skills](https://github.com/mattpocock/skills))_
+### Productivity
+
+- **[excalidraw-mcp-drawing](./skills/productivity/excalidraw-mcp-drawing/SKILL.md)** — Draw high-quality diagrams on an Excalidraw canvas via the excalidraw-mcp server and save them to disk correctly.
+
+_Vendored from [mattpocock/skills](https://github.com/mattpocock/skills):_
 
 - **[grill-me](./skills/productivity/grill-me/SKILL.md)** — Get relentlessly interviewed about a plan or design until every branch is resolved.
 - **[grill-with-docs](./skills/productivity/grill-with-docs/SKILL.md)** — Grilling session that challenges your plan against the existing domain model and updates docs inline.
