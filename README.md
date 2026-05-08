@@ -47,6 +47,12 @@ _Vendored from [mattpocock/skills](https://github.com/mattpocock/skills):_
 - **[book-2-site](./skills/learning/book-2-site/SKILL.md)** — Convert a book into an interactive learning website.
 - **[youtube-summary](./skills/learning/youtube-summary/SKILL.md)** — Summarise a YouTube video from its transcript into a structured markdown note.
 
+### GSD (Get Shit Done)
+
+66 workflow skills covering the full GSD lifecycle — phase planning,
+execution, verification, reviews, audits, and more. See
+[`skills/gsd/README.md`](./skills/gsd/README.md) for the full list.
+
 ### Productivity
 
 - **[excalidraw-mcp-drawing](./skills/productivity/excalidraw-mcp-drawing/SKILL.md)** — Draw high-quality diagrams on an Excalidraw canvas via the excalidraw-mcp server and save them to disk correctly.
