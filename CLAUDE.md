@@ -13,11 +13,32 @@ Skills are organized into bucket folders under `skills/`:
 
 - Every skill in `engineering/`, `productivity/`, `learning/`, or `personal_agent/` **must**:
   - Appear in the top-level `README.md` under its bucket
-  - Appear in `.claude-plugin/plugin.json` `skills` array
+  - Appear in `.claude-plugin/marketplace.json` under the matching bucket plugin
   - Appear in its bucket's `README.md` with a one-line description
 - Skills in `personal/` **must not** appear in the top-level `README.md` or
-  `plugin.json`.
+  `marketplace.json`.
 - Each skill name in a README must link to its `SKILL.md`.
+
+## Manifest layout
+
+This repo uses `.claude-plugin/marketplace.json` (NOT a single `plugin.json`)
+so the [`skills` CLI](https://skills.sh) groups skills by bucket in its
+interactive picker:
+
+```
+Select skills to install
+│  ◻ Engineering
+│  │ ◻ diagnose
+│  │ ◻ ...
+│  ◻ Personal Agent
+│  │ ◻ ingest-quick-note
+│  │ ◻ ...
+```
+
+One plugin per bucket. Plugin names are kebab-case (`personal-agent`); the CLI
+title-cases them for display (`Personal Agent`). When adding a new bucket,
+add a new plugin entry to `marketplace.json` AND register the bucket in the
+list above.
 
 ## Vendored skills
 

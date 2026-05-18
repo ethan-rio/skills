@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "pluginRoot": "./skills"
+  },
+  "plugins": [
+    {
+      "name": "engineering",
+      "source": "./",
+      "skills": [
+        "./engineering/diagnose",
+        "./engineering/drawio-aws-diagrams",
+        "./engineering/improve-codebase-architecture",
+        "./engineering/prototype",
+        "./engineering/prove-it",
+        "./engineering/tdd",
+        "./engineering/zoom-out"
+      ]
+    },
+    {
+      "name": "learning",
+      "source": "./",
+      "skills": [
+        "./learning/book-2-site",
+        "./learning/youtube-summary"
+      ]
+    },
+    {
+      "name": "personal-agent",
+      "source": "./",
+      "skills": [
+        "./personal_agent/obsidian-vault",
+        "./personal_agent/ingest-quick-note",
+        "./personal_agent/ingest-article",
+        "./personal_agent/ingest-youtube",
+        "./personal_agent/ingest-pdf",
+        "./personal_agent/ingest-voice-note",
+        "./personal_agent/curate",
+        "./personal_agent/extract-graph",
+        "./personal_agent/synthesize-wiki",
+        "./personal_agent/update-index",
+        "./personal_agent/recall",
+        "./personal_agent/daily-review"
+      ]
+    },
+    {
+      "name": "productivity",
+      "source": "./",
+      "skills": [
+        "./productivity/excalidraw-mcp-drawing",
+        "./productivity/grill-me",
+        "./productivity/grill-with-docs",
+        "./productivity/handoff",
+        "./productivity/to-prd",
+        "./productivity/write-a-skill"
+      ]
+    }
+  ]
+}
