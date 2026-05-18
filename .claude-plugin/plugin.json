@@ -1,6 +1,6 @@
 {
   "name": "ethan-skills",
-  "description": "Ethan's personal agent skills — engineering, productivity, learning.",
+  "description": "Ethan's personal agent skills — engineering, productivity, learning, personal-agent (PKM).",
   "version": "0.1.0",
   "author": {
     "name": "ethan-rio"
@@ -15,6 +15,18 @@
     "./skills/engineering/zoom-out",
     "./skills/learning/book-2-site",
     "./skills/learning/youtube-summary",
+    "./skills/personal_agent/obsidian-vault",
+    "./skills/personal_agent/ingest-quick-note",
+    "./skills/personal_agent/ingest-article",
+    "./skills/personal_agent/ingest-youtube",
+    "./skills/personal_agent/ingest-pdf",
+    "./skills/personal_agent/ingest-voice-note",
+    "./skills/personal_agent/curate",
+    "./skills/personal_agent/extract-graph",
+    "./skills/personal_agent/synthesize-wiki",
+    "./skills/personal_agent/update-index",
+    "./skills/personal_agent/recall",
+    "./skills/personal_agent/daily-review",
     "./skills/productivity/excalidraw-mcp-drawing",
     "./skills/productivity/grill-me",
     "./skills/productivity/grill-with-docs",

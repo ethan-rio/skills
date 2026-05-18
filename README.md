@@ -4,12 +4,16 @@ My personal agent skills for Claude Code (and other `SKILL.md`-aware agents) —
 tools I use every day for AWS / data engineering, deep learning from external
 material, and staying aligned with coding agents.
 
-No unifying thesis yet. Three clusters have emerged from daily use:
+No unifying thesis yet. Four clusters have emerged from daily use:
 
 - **Engineering** — disciplined work in complex technical environments
   (AWS architecture diagrams, testing your grasp of a codebase).
 - **Learning** — turn passive external content into active understanding
   (books into interactive sites, YouTube into structured notes).
+- **Personal agent** — second-brain skills for a Telegram-first PKM agent:
+  ingest raw resources, curate, extract into a graph, synthesize wiki notes,
+  recall on demand. Inspired by [Vivian Balakrishnan's Building a 'Second Brain'
+  talk](https://www.youtube.com/watch?v=t-4a20_iYhg).
 - **Productivity** — stay aligned with your agent before writing code
   (grilling sessions, PRDs, skill authoring). Vendored from
   [`mattpocock/skills`](https://github.com/mattpocock/skills).
@@ -46,6 +50,34 @@ _Vendored from [mattpocock/skills](https://github.com/mattpocock/skills):_
 
 - **[book-2-site](./skills/learning/book-2-site/SKILL.md)** — Convert a book into an interactive learning website.
 - **[youtube-summary](./skills/learning/youtube-summary/SKILL.md)** — Summarise a YouTube video from its transcript into a structured markdown note.
+
+### Personal agent
+
+Hermes-shaped second-brain skills, agent-agnostic. See [`skills/personal_agent/README.md`](./skills/personal_agent/README.md) for the full bucket.
+
+_Foundation:_
+
+- **[obsidian-vault](./skills/personal_agent/obsidian-vault/SKILL.md)** — vault contract (path, layout, frontmatter, linking) every other personal-agent skill assumes.
+
+_Ingest (raw input → Inbox/):_
+
+- **[ingest-quick-note](./skills/personal_agent/ingest-quick-note/SKILL.md)** — capture a short text thought.
+- **[ingest-article](./skills/personal_agent/ingest-article/SKILL.md)** — scrape a web article (Firecrawl) into the Inbox.
+- **[ingest-youtube](./skills/personal_agent/ingest-youtube/SKILL.md)** — wrap `youtube-summary` and file into the Inbox.
+- **[ingest-pdf](./skills/personal_agent/ingest-pdf/SKILL.md)** — extract text from a PDF into the Inbox.
+- **[ingest-voice-note](./skills/personal_agent/ingest-voice-note/SKILL.md)** — Whisper-transcribe a voice message.
+
+_Process (Inbox → graph + wiki):_
+
+- **[curate](./skills/personal_agent/curate/SKILL.md)** — review Inbox items and promote to root as `Source -- ...md`.
+- **[extract-graph](./skills/personal_agent/extract-graph/SKILL.md)** — extract entity-relation triples (causal/temporal/semantic) into the Honcho graph.
+- **[synthesize-wiki](./skills/personal_agent/synthesize-wiki/SKILL.md)** — generate a `Wiki -- <Topic>.md` note from a topic + graph subset.
+
+_Navigate:_
+
+- **[update-index](./skills/personal_agent/update-index/SKILL.md)** — inject `[[wikilinks]]` to new wikis into the right `<Topic> Index.md` MOC notes.
+- **[recall](./skills/personal_agent/recall/SKILL.md)** — answer questions from the vault with `[[wikilink]]` citations.
+- **[daily-review](./skills/personal_agent/daily-review/SKILL.md)** — daily housekeeping digest (inbox debt, broken links, ripe topics).
 
 ### Productivity
 
