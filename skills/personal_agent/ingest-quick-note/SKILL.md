@@ -1,7 +1,7 @@
 ---
 name: ingest-quick-note
 description: Capture a short text thought into the Obsidian Inbox. Smallest end-to-end ingest skill — text in, frontmatter-correct .md out. Use when the user types a freeform thought, runs /note <text>, or sends a Telegram text message that isn't a URL or file.
-when_to_use: Plain text message arrives via Telegram or chat, OR user types `/note <text>`, OR user says "save this thought / capture this / quick note: ...". Default fallback when no other ingest skill matches.
+when_to_use: Plain text message arrives via Telegram or chat, OR user types `/note <text>`, OR user says "save this thought / capture this / quick note - ...". Default fallback when no other ingest skill matches.
 argument-hint: <free text>
 allowed-tools: Bash Write
 ---
