@@ -1,0 +1,62 @@
+{
+  "infobox_rows": [
+    {
+      "label": "Paradigms",
+      "value": "Concurrentfunctionalgenericimperativestructured"
+    },
+    {
+      "label": "Developer",
+      "value": "The Rust Team"
+    },
+    {
+      "label": "First appeared",
+      "value": "January 19, 2012; 14 years ago"
+    },
+    {
+      "label": "Stable release",
+      "value": "1.95[1]  / April 16, 2026; 34 days ago"
+    },
+    {
+      "label": "Typing discipline",
+      "value": "Affineinferrednominalstaticstrong"
+    },
+    {
+      "label": "Implementation language",
+      "value": "OCaml (2006–2011)\nRust (2012–present)"
+    },
+    {
+      "label": "Platform",
+      "value": "Cross-platform[note 1]"
+    },
+    {
+      "label": "OS",
+      "value": "Cross-platform[note 2]"
+    },
+    {
+      "label": "License",
+      "value": "MIT, Apache 2.0[note 3]"
+    },
+    {
+      "label": "Filename extensions",
+      "value": ".rs, .rlib"
+    },
+    {
+      "label": "Website",
+      "value": "rust-lang.org"
+    }
+  ],
+  "sections": [
+    "History",
+    "Syntax and features",
+    "Safety",
+    "Ecosystem",
+    "Performance",
+    "Adoption",
+    "In academic research",
+    "Community",
+    "See also",
+    "Notes"
+  ],
+  "summary": "Rust is a general-purpose programming language which emphasizes performance, type safety, concurrency, and memory safety.",
+  "title": "Rust (programming language)"
+}

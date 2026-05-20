@@ -1,0 +1,10 @@
+{
+  "country": "AU",
+  "currency": "AUD",
+  "customer_id_present": false,
+  "has_apple_pay": true,
+  "locale": "en",
+  "page_type": "home",
+  "platform": "Shopify",
+  "shop": "prod-jbhifi.myshopify.com"
+}

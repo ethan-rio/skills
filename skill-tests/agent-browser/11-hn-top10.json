@@ -1,0 +1,92 @@
+[
+  {
+    "age": "1 hour ago",
+    "author": "cdrnsf",
+    "comments": "1 hour ago",
+    "rank": 1,
+    "score": "135 points",
+    "title": "Google Declaring War on the Web",
+    "url": "https://tante.cc/2026/05/20/on-google-declaring-war-on-the-web/"
+  },
+  {
+    "age": "3 hours ago",
+    "author": "tedsanders",
+    "comments": "3 hours ago",
+    "rank": 2,
+    "score": "525 points",
+    "title": "An OpenAI model has disproved a central conjecture in discrete geometry",
+    "url": "https://openai.com/index/model-disproves-discrete-geometry-conjecture/"
+  },
+  {
+    "age": "4 hours ago",
+    "author": "Timofeibu",
+    "comments": "4 hours ago",
+    "rank": 3,
+    "score": "351 points",
+    "title": "GitHub confirms breach of 3,800 repos via malicious VSCode extension",
+    "url": "https://www.bleepingcomputer.com/news/security/github-confirms-breach-of-3-800-repos-via-malicious-vscode-extension/"
+  },
+  {
+    "age": "57 minutes ago",
+    "author": "pantalaimon",
+    "comments": "57 minutes ago",
+    "rank": 4,
+    "score": "42 points",
+    "title": "Starship's Twelfth Flight Test",
+    "url": "https://www.spacex.com/launches/starship-flight-12"
+  },
+  {
+    "age": "4 hours ago",
+    "author": "gregsadetsky",
+    "comments": "4 hours ago",
+    "rank": 5,
+    "score": "167 points",
+    "title": "Flipper One Tech Specs",
+    "url": "https://docs.flipper.net/one/general/tech-specs"
+  },
+  {
+    "age": "6 hours ago",
+    "author": "hexagr",
+    "comments": "6 hours ago",
+    "rank": 6,
+    "score": "243 points",
+    "title": "How fast is N tokens per second really?",
+    "url": "https://mikeveerman.github.io/tokenspeed/"
+  },
+  {
+    "age": "3 hours ago",
+    "author": "Timofeibu",
+    "comments": "3 hours ago",
+    "rank": 7,
+    "score": "94 points",
+    "title": "Not alive, but not dead: disembodied human brains used for drug testing",
+    "url": "https://www.science.org/content/article/not-alive-not-dead-disembodied-human-brains-used-drug-testing"
+  },
+  {
+    "age": "12 hours ago",
+    "author": "kevinsimper",
+    "comments": "12 hours ago",
+    "rank": 8,
+    "score": "573 points",
+    "title": "Qwen3.7-Max: The Agent Frontier",
+    "url": "https://qwen.ai/blog?id=qwen3.7"
+  },
+  {
+    "age": "1 hour ago",
+    "author": "AMavorParker",
+    "comments": "1 hour ago",
+    "rank": 9,
+    "score": "23 points",
+    "title": "PopuLoRA: Co-Evolving LLM Populations for Reasoning Self- Play",
+    "url": "https://vmax.ai/team/populora-co-evolving-llm-populations-for-reasoning-self-play"
+  },
+  {
+    "age": "5 hours ago",
+    "author": "speckx",
+    "comments": "5 hours ago",
+    "rank": 10,
+    "score": "76 points",
+    "title": "Why is Inkwell stuck in review",
+    "url": "https://www.manton.org/2026/05/19/why-is-inkwell-stuck-in.html"
+  }
+]
