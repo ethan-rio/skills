@@ -46,6 +46,7 @@
       "name": "productivity",
       "source": "./",
       "skills": [
+        "./productivity/agent-browser",
         "./productivity/excalidraw-mcp-drawing",
         "./productivity/grill-me",
         "./productivity/grill-with-docs",
