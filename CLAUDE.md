@@ -6,12 +6,13 @@ Skills are organized into bucket folders under `skills/`:
 - `productivity/` — daily non-code workflow tools
 - `learning/` — turn external content into active understanding
 - `personal_agent/` — second-brain ingest, synthesis, recall (hermes-shaped, agent-agnostic)
+- `html/` — bundled HTML-output skills (vendored from [`f-labs-io/agent-html-skills`](https://github.com/f-labs-io/agent-html-skills), MIT)
 - `personal/` — tied to my own setup, not promoted
 - `goose/` — placeholder for skills targeting the [Goose](https://block.github.io/goose/) framework
 
 ## Inclusion rules
 
-- Every skill in `engineering/`, `productivity/`, `learning/`, or `personal_agent/` **must**:
+- Every skill in `engineering/`, `productivity/`, `learning/`, `personal_agent/`, or `html/` **must**:
   - Appear in the top-level `README.md` under its bucket
   - Appear in `.claude-plugin/marketplace.json` under the matching bucket plugin
   - Appear in its bucket's `README.md` with a one-line description

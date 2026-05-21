@@ -17,6 +17,30 @@
       ]
     },
     {
+      "name": "html",
+      "source": "./",
+      "skills": [
+        "./html/html-architecture-diagrams",
+        "./html/html-brainstorm-grid",
+        "./html/html-code-review",
+        "./html/html-comparison-matrix",
+        "./html/html-data-explorer",
+        "./html/html-design-prototypes",
+        "./html/html-design-tokens",
+        "./html/html-erd-explorer",
+        "./html/html-interactive-playground",
+        "./html/html-mind-map",
+        "./html/html-research-reports",
+        "./html/html-skills-listen",
+        "./html/html-skills-stop",
+        "./html/html-slideshow-deck",
+        "./html/html-spec-planning",
+        "./html/html-svg-diagrams",
+        "./html/html-throwaway-editor",
+        "./html/html-timeline-roadmap"
+      ]
+    },
+    {
       "name": "learning",
       "source": "./",
       "skills": [

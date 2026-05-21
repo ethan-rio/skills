@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Checkout button — animation tuner</title>
+<style>
+:root{
+  --bg:#fafafa; --panel:#fff; --rule:#e5e5e3; --ink:#171717; --mute:#737373;
+  --accent:#7c3aed; --accent2:#a78bfa;
+  --mono:ui-monospace,Menlo,monospace; --sans:Inter,system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55}
+.wrap{max-width:1100px;margin:0 auto;padding:32px 22px 60px;display:grid;grid-template-columns:1fr 320px;gap:28px}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+header{grid-column:1/-1}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+h1{font-size:28px;margin:6px 0;font-weight:600;letter-spacing:-.01em}
+.dek{color:var(--mute);max-width:62ch}
+.stage{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:60px 30px;display:grid;place-items:center;min-height:280px}
+.cta{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 26px;font:600 16px var(--sans);background:var(--ink);color:#fff;border:0;border-radius:12px;cursor:pointer;overflow:hidden}
+.cta .label{position:relative;z-index:2;display:inline-flex;align-items:center;gap:8px}
+.cta .pulse{position:absolute;inset:0;background:var(--accent);transform:translateX(-100%);z-index:1}
+.cta.playing .pulse{animation:pulse var(--dur,400ms) var(--ease, cubic-bezier(.2,.8,.2,1)) forwards}
+.cta.purple{background:var(--accent)}
+@keyframes pulse{0%{transform:translateX(-100%)}60%{transform:translateX(0)}100%{transform:translateX(100%)}}
+.controls{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:20px}
+.controls h2{margin:0 0 14px;font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.row{margin-bottom:14px}
+.row label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin-bottom:6px}
+.row input[type=range]{width:100%}
+.row .v{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:600}
+.row select{width:100%;padding:6px 8px;border:1px solid var(--rule);border-radius:6px;font-family:var(--mono);font-size:12px;background:#fff}
+.actions{display:flex;gap:8px;margin-top:14px}
+button.btn{font-family:var(--mono);font-size:12px;padding:9px 12px;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:6px;cursor:pointer;flex:1}
+button.btn.primary{background:var(--ink);color:#fff}
+.snippet{grid-column:1/-1;background:#0e0e10;color:#f4f4f5;border-radius:14px;padding:18px;font:13px var(--mono);overflow:auto}
+.snippet .key{color:#a78bfa} .snippet .str{color:#fbbf24}
+footer{grid-column:1/-1;color:var(--mute);font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--rule);padding-top:14px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 14px;border-radius:8px;font:12px var(--mono);opacity:0;transition:opacity .25s}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="eyebrow">Design prototype · checkout button · v0</div>
+<h1>Tune the click animation</h1>
+<p class="dek">Click the button to play the animation with the current parameters. Adjust duration, easing, and end-color, then submit the parameters back to Claude when you find a combo you like.</p>
+</header>
+
+<div class="stage" id="stage">
+<button class="cta" id="cta" type="button">
+  <span class="pulse"></span>
+  <span class="label">Pay $42.00 →</span>
+</button>
+</div>
+
+<aside class="controls">
+<h2>Parameters</h2>
+
+<div class="row">
+<label>Duration <span class="v" id="dv">400ms</span></label>
+<input type="range" id="dur" min="120" max="1200" step="20" value="400" />
+</div>
+
+<div class="row">
+<label>Easing</label>
+<select id="ease">
+  <option value="cubic-bezier(.2,.8,.2,1)">smooth · cubic(.2,.8,.2,1)</option>
+  <option value="cubic-bezier(.34,1.56,.64,1)">snappy · cubic(.34,1.56,.64,1)</option>
+  <option value="ease-out">ease-out</option>
+  <option value="cubic-bezier(.6,-.28,.74,.05)">linger</option>
+  <option value="linear">linear</option>
+</select>
+</div>
+
+<div class="row">
+<label>Final color <span class="v" id="cv">#7c3aed</span></label>
+<input type="color" id="color" value="#7c3aed" />
+</div>
+
+<div class="row">
+<label>Auto-trigger every <span class="v" id="iv">off</span></label>
+<input type="range" id="auto" min="0" max="6" step="1" value="0" />
+</div>
+
+<div class="actions">
+<button class="btn" id="play">▶ Play once</button>
+<button class="btn primary" id="submit">Submit params →</button>
+</div>
+</aside>
+
+<pre class="snippet" id="code"></pre>
+
+<footer>
+<span>Last updated 2026-05-21 · prototype, not a component yet</span>
+<span>Submit copies the params; paste into Claude to ship into the real component</span>
+</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="./_submit-handler.js"></script>
+<script>
+const cta = document.getElementById('cta');
+const dur = document.getElementById('dur');
+const ease = document.getElementById('ease');
+const color = document.getElementById('color');
+const auto = document.getElementById('auto');
+
+let timer=null;
+
+function apply(){
+  cta.style.setProperty('--dur', dur.value+'ms');
+  cta.style.setProperty('--ease', ease.value);
+  document.documentElement.style.setProperty('--accent', color.value);
+  document.getElementById('dv').textContent = dur.value+'ms';
+  document.getElementById('cv').textContent = color.value;
+  document.getElementById('iv').textContent = auto.value==='0'?'off':auto.value+'s';
+  renderCode();
+  if(timer) clearInterval(timer);
+  if(auto.value!=='0'){ timer=setInterval(play, 1000*+auto.value); }
+}
+
+function play(){
+  cta.classList.remove('playing'); void cta.offsetWidth; cta.classList.add('playing');
+  setTimeout(()=>{ cta.classList.add('purple'); }, +dur.value*0.4);
+  setTimeout(()=>{ cta.classList.remove('purple'); cta.classList.remove('playing'); }, +dur.value+50);
+}
+
+function renderCode(){
+  const o = { duration: dur.value+'ms', easing: ease.value, color: color.value, autoTriggerSec: +auto.value };
+  const code = JSON.stringify(o, null, 2)
+    .replace(/("[^"]+")(?=\s*:)/g,'<span class="key">$1</span>')
+    .replace(/: ("[^"]*")/g,': <span class="str">$1</span>');
+  document.getElementById('code').innerHTML = '/* params for &lt;PayButton/&gt; */\n' + code;
+}
+[dur,ease,color,auto].forEach(el=>el.addEventListener('input', apply));
+cta.addEventListener('click', play);
+document.getElementById('play').addEventListener('click', play);
+apply();
+
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1500); }
+
+document.getElementById('submit').addEventListener('click', async ()=>{
+  await submitToClaude({
+    skill:'html-design-prototypes', kind:'animation-params',
+    data:{ component:'PayButton', duration_ms:+dur.value, easing:ease.value, color:color.value, auto_trigger_sec:+auto.value },
+    version:1
+  });
+  toast('Submitted');
+});
+</script>
+</body>
+</html>

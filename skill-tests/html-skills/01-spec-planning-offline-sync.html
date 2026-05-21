@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Offline Sync — Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5efe6; --ink:#1f1a13; --rule:#3d2f1f; --muted:#6b5a44;
+  --accent:#9c2a1a; --warn:#a86b00; --ok:#2c5e2e;
+  --serif:'Fraunces', Georgia, serif; --mono:'JetBrains Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding:48px 28px 80px}
+header{border-bottom:2px solid var(--rule);padding-bottom:18px;margin-bottom:36px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:46px;line-height:1.05;margin:6px 0 8px;font-weight:600;letter-spacing:-.02em}
+.dek{font-style:italic;color:var(--muted);max-width:62ch}
+h2{font-family:var(--serif);font-size:24px;margin:42px 0 10px;border-top:1px solid var(--rule);padding-top:18px}
+h3{font-family:var(--mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:24px 0 8px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:720px){.grid3{grid-template-columns:1fr}}
+.card{border:1px solid var(--rule);padding:18px;background:#fbf6ec}
+.card h4{margin:0 0 6px;font-size:18px}
+.card .meta{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.pros li::marker{color:var(--ok)}
+.cons li::marker{color:var(--accent)}
+ul{padding-left:18px;margin:8px 0}
+.callout{border-left:4px solid var(--warn);background:#fff5e0;padding:14px 18px;margin:18px 0}
+.callout strong{font-family:var(--mono);text-transform:uppercase;font-size:11px;letter-spacing:.1em;color:var(--warn)}
+pre{background:#1f1a13;color:#f5efe6;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.5}
+code{font-family:var(--mono)}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);background:#ece4d4}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border:1px solid var(--rule);border-radius:99px;color:var(--muted)}
+svg{display:block;max-width:100%}
+.flow{background:#fbf6ec;border:1px solid var(--rule);padding:18px;margin:14px 0}
+footer{margin-top:60px;font-family:var(--mono);font-size:11px;color:var(--muted);border-top:1px solid var(--rule);padding-top:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media print{body{background:#fff}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Spec · Aurora Notes · v0.2 draft</div>
+  <h1>Offline sync for collaborative notes</h1>
+  <p class="dek">A spec for letting users edit notes offline and converging on a clean shared state when they reconnect — without losing edits, surprising the user, or shipping a CRDT we'll regret in two years.</p>
+</header>
+
+<h2>1 · Problem</h2>
+<p>Currently the editor requires a live websocket. Every keystroke flies to the server. On flaky cellular or in airplane mode, users see a frozen UI and lose work. We've had four support escalations this month.</p>
+
+<h2>2 · Constraints</h2>
+<ul>
+  <li>Must converge — never silently drop a user's edit</li>
+  <li>Must work for documents up to ~100k chars (95th percentile is ~12k)</li>
+  <li>Must respect the existing <code>document_versions</code> table; no schema rewrite</li>
+  <li>Must ship behind the <code>offline_sync</code> flag, dark-launchable</li>
+</ul>
+
+<h2>3 · Three approaches</h2>
+<div class="grid3">
+  <div class="card">
+    <div class="meta">Option A</div>
+    <h4>Last-write-wins with operation log</h4>
+    <p>Queue ops locally, replay on reconnect, server timestamps win.</p>
+    <ul class="pros"><li>Two days to ship</li><li>No new dependency</li></ul>
+    <ul class="cons"><li>Concurrent edits clobber each other</li><li>Users notice</li></ul>
+    <p class="meta">Best when: solo-edit workflows dominate (they don't, for us)</p>
+  </div>
+  <div class="card">
+    <div class="meta">Option B · recommended</div>
+    <h4>Yjs CRDT with IndexedDB persistence</h4>
+    <p>Battle-tested CRDT, automatic merge, plugs into ProseMirror.</p>
+    <ul class="pros"><li>Real merge, no data loss</li><li>Existing y-prosemirror binding</li></ul>
+    <ul class="cons"><li>~80kb gzip added</li><li>Document size grows ~1.4×</li></ul>
+    <p class="meta">Best when: collab is core. It is.</p>
+  </div>
+  <div class="card">
+    <div class="meta">Option C</div>
+    <h4>Custom OT with server arbiter</h4>
+    <p>Operational transform like Google Docs of yore.</p>
+    <ul class="pros"><li>Smaller payload than CRDT</li></ul>
+    <ul class="cons"><li>Six months to ship right</li><li>Edge cases haunt you</li><li>Nobody on the team has done OT</li></ul>
+    <p class="meta">Best when: never, for a 4-person team</p>
+  </div>
+</div>
+
+<div class="callout"><strong>Decision</strong> &nbsp;Going with Option B. Yjs has the best maturity per engineering hour we'll spend.</div>
+
+<h2>4 · Data flow</h2>
+<div class="flow">
+<svg viewBox="0 0 880 230" role="img" aria-label="Data flow: local editor to indexeddb to outbox to server">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#3d2f1f"/>
+  </marker>
+</defs>
+<g font-family="JetBrains Mono" font-size="12" fill="#1f1a13">
+  <rect x="20" y="60" width="150" height="80" fill="#fff" stroke="#3d2f1f"/>
+  <foreignObject x="28" y="68" width="134" height="64"><div xmlns="http://www.w3.org/1999/xhtml" style="font:13px JetBrains Mono;color:#1f1a13"><b>Editor</b><br/>ProseMirror + y-prosemirror binding</div></foreignObject>
+
+  <rect x="220" y="20" width="160" height="60" fill="#ece4d4" stroke="#3d2f1f"/>
+  <foreignObject x="228" y="28" width="144" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="font:13px JetBrains Mono;color:#1f1a13"><b>Y.Doc (memory)</b><br/>authoritative state</div></foreignObject>
+
+  <rect x="220" y="120" width="160" height="60" fill="#ece4d4" stroke="#3d2f1f"/>
+  <foreignObject x="228" y="128" width="144" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="font:13px JetBrains Mono;color:#1f1a13"><b>IndexedDB</b><br/>y-indexeddb persists</div></foreignObject>
+
+  <rect x="430" y="60" width="160" height="80" fill="#fff5e0" stroke="#a86b00"/>
+  <foreignObject x="438" y="68" width="144" height="64"><div xmlns="http://www.w3.org/1999/xhtml" style="font:13px JetBrains Mono;color:#1f1a13"><b>Outbox</b><br/>pending updates queue</div></foreignObject>
+
+  <rect x="640" y="60" width="200" height="80" fill="#fbf6ec" stroke="#3d2f1f"/>
+  <foreignObject x="648" y="68" width="184" height="64"><div xmlns="http://www.w3.org/1999/xhtml" style="font:13px JetBrains Mono;color:#1f1a13"><b>Server (Yjs)</b><br/>aggregate &amp; broadcast</div></foreignObject>
+
+  <line x1="170" y1="100" x2="220" y2="50"  stroke="#3d2f1f" marker-end="url(#ar)"/>
+  <line x1="170" y1="100" x2="220" y2="150" stroke="#3d2f1f" marker-end="url(#ar)"/>
+  <line x1="380" y1="100" x2="430" y2="100" stroke="#3d2f1f" marker-end="url(#ar)"/>
+  <line x1="590" y1="100" x2="640" y2="100" stroke="#3d2f1f" marker-end="url(#ar)" stroke-dasharray="6 4"/>
+  <text x="600" y="92" font-size="11" fill="#6b5a44">when online</text>
+</g>
+</svg>
+</div>
+
+<h2>5 · Implementation plan</h2>
+<table>
+<thead><tr><th>Step</th><th>File / module</th><th>What changes</th><th>Owner</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>src/editor/binding.ts</code></td><td>Replace REST sync with y-prosemirror binding</td><td>EM</td></tr>
+<tr><td>2</td><td><code>src/storage/idb.ts</code> (new)</td><td>y-indexeddb persistence keyed by docId</td><td>EM</td></tr>
+<tr><td>3</td><td><code>src/transport/ws.ts</code></td><td>Outbox + reconnect with exponential backoff</td><td>JR</td></tr>
+<tr><td>4</td><td><code>server/sync/handler.go</code></td><td>Merge incoming updates into canonical Y.Doc</td><td>JR</td></tr>
+<tr><td>5</td><td><code>flags.yaml</code></td><td>Add <code>offline_sync</code> flag, default false</td><td>EM</td></tr>
+<tr><td>6</td><td><code>tests/e2e/offline.spec.ts</code></td><td>Playwright: go offline, edit, reconnect, assert merge</td><td>EM</td></tr>
+</tbody>
+</table>
+
+<h3>Risky bit</h3>
+<pre><code>// We must NOT call applyUpdate on the server's view of a doc until
+// every prior update for that clientID has been applied — otherwise
+// causality breaks and Yjs throws an opaque error.
+applyUpdatesInOrder(doc, updatesByClock(updates))</code></pre>
+
+<h2>6 · Open questions</h2>
+<div class="callout"><strong>Open</strong> &nbsp;What's our retention policy for orphaned IndexedDB docs? (User logs out on a shared machine.) Default to wipe on logout, but confirm with security.</div>
+<div class="callout"><strong>Open</strong> &nbsp;Do we GC the server's update log? Yjs grows monotonically. ~6 weeks before 100MB at p95.</div>
+
+<h2>7 · Out of scope</h2>
+<ul>
+  <li>Mobile app (separate spec, after web ships)</li>
+  <li>Cross-document references / transclusion</li>
+  <li>Read receipts / cursor presence (presence already works; we keep it)</li>
+</ul>
+
+<footer>
+  <span>Author: agent · Last updated 2026-05-21</span>
+  <span><span class="tag">draft</span> <span class="tag">eng</span></span>
+</footer>
+</div>
+</body>
+</html>

@@ -4,7 +4,7 @@ My personal agent skills for Claude Code (and other `SKILL.md`-aware agents) —
 tools I use every day for AWS / data engineering, deep learning from external
 material, and staying aligned with coding agents.
 
-No unifying thesis yet. Four clusters have emerged from daily use:
+No unifying thesis yet. Five clusters have emerged from daily use:
 
 - **Engineering** — disciplined work in complex technical environments
   (AWS architecture diagrams, testing your grasp of a codebase).
@@ -17,6 +17,10 @@ No unifying thesis yet. Four clusters have emerged from daily use:
 - **Productivity** — stay aligned with your agent before writing code
   (grilling sessions, PRDs, skill authoring). Vendored from
   [`mattpocock/skills`](https://github.com/mattpocock/skills).
+- **HTML** — push Claude toward HTML as the working surface (specs, diagrams,
+  dashboards, throwaway editors) instead of long-form markdown when HTML is
+  the better medium. Vendored from
+  [`f-labs-io/agent-html-skills`](https://github.com/f-labs-io/agent-html-skills).
 
 ## Install
 
@@ -79,6 +83,49 @@ _Navigate:_
 - **[recall](./skills/personal_agent/recall/SKILL.md)** — answer questions from the vault with `[[wikilink]]` citations.
 - **[daily-review](./skills/personal_agent/daily-review/SKILL.md)** — daily housekeeping digest (inbox debt, broken links, ripe topics).
 
+### HTML
+
+Vendored from [f-labs-io/agent-html-skills](https://github.com/f-labs-io/agent-html-skills) (MIT). See [`skills/html/README.md`](./skills/html/README.md) for the full bucket and [`skills/html/ATTRIBUTION.md`](./skills/html/ATTRIBUTION.md) for the per-bucket attribution.
+
+_Specs &amp; planning:_
+
+- **[html-spec-planning](./skills/html/html-spec-planning/SKILL.md)** — specs, RFCs, implementation plans, exploration.
+- **[html-code-review](./skills/html/html-code-review/SKILL.md)** — PR explainers, refactor risk maps, codebase tours.
+- **[html-architecture-diagrams](./skills/html/html-architecture-diagrams/SKILL.md)** — system maps, deployment topologies.
+
+_Exploration &amp; comparison:_
+
+- **[html-brainstorm-grid](./skills/html/html-brainstorm-grid/SKILL.md)** — N-variant comparison grids when exploring options.
+- **[html-comparison-matrix](./skills/html/html-comparison-matrix/SKILL.md)** — weighted decision matrices for named candidates.
+- **[html-data-explorer](./skills/html/html-data-explorer/SKILL.md)** — filterable tables, faceted search, log viewers.
+
+_Design:_
+
+- **[html-design-prototypes](./skills/html/html-design-prototypes/SKILL.md)** — component design, animation tuning, design systems.
+- **[html-design-tokens](./skills/html/html-design-tokens/SKILL.md)** — color/type/spacing token showcases.
+
+_Diagrams &amp; data shapes:_
+
+- **[html-erd-explorer](./skills/html/html-erd-explorer/SKILL.md)** — database schema visualizations.
+- **[html-svg-diagrams](./skills/html/html-svg-diagrams/SKILL.md)** — flowcharts, sequence diagrams, state machines.
+- **[html-mind-map](./skills/html/html-mind-map/SKILL.md)** — branching concept maps that send the tree back.
+
+_Communication:_
+
+- **[html-research-reports](./skills/html/html-research-reports/SKILL.md)** — multi-source research synthesis, status reports, incidents.
+- **[html-slideshow-deck](./skills/html/html-slideshow-deck/SKILL.md)** — keyboard-navigable presentation decks.
+
+_Throwaway editors &amp; tuners:_
+
+- **[html-interactive-playground](./skills/html/html-interactive-playground/SKILL.md)** — sliders/knobs for tuning parameters.
+- **[html-throwaway-editor](./skills/html/html-throwaway-editor/SKILL.md)** — one-off editors that send results back to Claude.
+- **[html-timeline-roadmap](./skills/html/html-timeline-roadmap/SKILL.md)** — gantt / roadmap / timeline views.
+
+_Infrastructure (the receiver that closes the click → Claude loop):_
+
+- **[html-skills-listen](./skills/html/html-skills-listen/SKILL.md)** — sets up the per-session local receiver and Monitor for interactive artifacts.
+- **[html-skills-stop](./skills/html/html-skills-stop/SKILL.md)** — tears down the receiver when work is done.
+
 ### Productivity
 
 - **[excalidraw-mcp-drawing](./skills/productivity/excalidraw-mcp-drawing/SKILL.md)** — Draw high-quality diagrams on an Excalidraw canvas via the excalidraw-mcp server and save them to disk correctly.
@@ -94,9 +141,15 @@ _Vendored from [mattpocock/skills](https://github.com/mattpocock/skills):_
 
 Several skills in `engineering/` and `productivity/` are vendored from
 [mattpocock/skills](https://github.com/mattpocock/skills) (MIT). Each vendored
-`SKILL.md` carries an attribution comment at the top. Modifications, if any,
-are tracked in this repo's git history. See [`LICENSE`](./LICENSE) for the
-full third-party notice.
+`SKILL.md` carries an attribution comment at the top.
+
+The entire `html/` bucket is vendored from
+[f-labs-io/agent-html-skills](https://github.com/f-labs-io/agent-html-skills) (MIT).
+Bucket-level attribution lives in [`skills/html/ATTRIBUTION.md`](./skills/html/ATTRIBUTION.md)
+rather than per-file blocks, since the whole bucket has the same upstream.
+
+Modifications, if any, are tracked in this repo's git history. See
+[`LICENSE`](./LICENSE) for the full third-party notice.
 
 ## License
 

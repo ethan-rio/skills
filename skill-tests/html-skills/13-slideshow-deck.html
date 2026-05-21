@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aurora Q3 — Internal kickoff</title>
+<style>
+:root{
+  --bg:#0a0a0a; --ink:#f5f5f5; --rule:#222; --mute:#888; --accent:#fbbf24; --hot:#f43f5e;
+  --serif:'Fraunces',Georgia,serif; --sans:Inter,system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden;font-size:18px}
+.deck{position:relative;width:100vw;height:100vh}
+.slide{position:absolute;inset:0;display:none;padding:60px 80px;flex-direction:column;justify-content:center}
+.slide.on{display:flex}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin-bottom:18px}
+h1{font-family:var(--serif);font-size:84px;line-height:1.0;margin:0;font-weight:600;letter-spacing:-.02em}
+h2{font-family:var(--serif);font-size:56px;line-height:1.05;margin:0 0 20px;font-weight:600;letter-spacing:-.02em}
+.lede{font-size:22px;color:var(--mute);max-width:32ch;font-style:italic}
+.kicker{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+ul{font-size:24px;line-height:1.6;margin:0;padding-left:24px}
+.threecol{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:24px}
+.threecol .card{border-top:3px solid var(--accent);padding-top:14px}
+.threecol .card h3{margin:0 0 6px;font-size:22px;font-family:var(--sans)}
+.threecol .card p{color:var(--mute);font-size:16px;margin:0}
+.bigstat{font-family:var(--serif);font-size:160px;line-height:1;letter-spacing:-.04em;color:var(--accent)}
+.callout{background:#1a1a1a;border-left:4px solid var(--hot);padding:18px 22px;font-size:22px;max-width:60ch}
+nav.controls{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:#111;padding:6px 10px;border-radius:99px;font-family:var(--mono);font-size:12px;color:var(--mute);z-index:10}
+nav.controls button{background:transparent;color:var(--ink);border:1px solid #333;border-radius:99px;padding:4px 10px;cursor:pointer;font:inherit}
+nav.controls button:hover{border-color:var(--accent)}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);transition:width .25s;z-index:11}
+.pageno{position:fixed;top:14px;right:18px;font-family:var(--mono);font-size:11px;color:var(--mute)}
+@media print{
+  .deck{height:auto}
+  .slide{display:block !important;page-break-after:always;height:100vh}
+  nav.controls,.progress,.pageno{display:none}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="pageno" id="pageno"></div>
+
+<div class="deck" id="deck">
+
+<section class="slide on">
+<div class="eyebrow">Aurora · all-hands · Q3 kickoff</div>
+<h1>Three bets,<br/>one quarter.</h1>
+<p class="lede">Where we point engineering between July and September.</p>
+</section>
+
+<section class="slide">
+<div class="kicker">Where we are</div>
+<h2>Q2 in one number</h2>
+<div class="bigstat">+38%</div>
+<p style="font-size:22px;color:var(--mute);max-width:50ch">Daily active users since April. Growth came from web; mobile is flat. Activation funnel still loses 41% at "create first note".</p>
+</section>
+
+<section class="slide">
+<div class="kicker">The bets</div>
+<h2>What we're optimizing for</h2>
+<div class="threecol">
+<div class="card"><h3>1 · Activation</h3><p>Halve the "create first note" drop-off. Onboarding rework + templates.</p></div>
+<div class="card"><h3>2 · Reliability</h3><p>p95 latency &lt; 200 ms across the API. Move limiter to sliding window.</p></div>
+<div class="card"><h3>3 · Mobile</h3><p>Ship offline sync. Get from "fine" to "people recommend it".</p></div>
+</div>
+</section>
+
+<section class="slide">
+<div class="kicker">Bet 1 · activation</div>
+<h2>Halve the first-note drop-off</h2>
+<ul>
+<li><b>Why it matters:</b> 41% leave before writing anything. Every other metric depends on this.</li>
+<li><b>Approach:</b> 6 onboarding variants live within 2 weeks; pick the winner by week 4.</li>
+<li><b>Owner:</b> Priya · <b>Decision deadline:</b> July 22.</li>
+</ul>
+</section>
+
+<section class="slide">
+<div class="kicker">Bet 2 · reliability</div>
+<h2>p95 &lt; 200 ms · all routes</h2>
+<div class="callout">The token-bucket limiter creates 1-second burst-then-pause patterns that trigger our SLO alerts. PR #4127 swaps it for a sliding window. <b>Ship by Aug 15.</b></div>
+</section>
+
+<section class="slide">
+<div class="kicker">Bet 3 · mobile</div>
+<h2>Offline-first or it's not mobile</h2>
+<ul>
+<li>CRDT (Yjs) + IndexedDB persistence on web; React Native binding behind it.</li>
+<li>Spec lands week 1, beta on Test Flight by week 8.</li>
+<li>Yes, this means rewriting the editor binding. Worth it.</li>
+</ul>
+</section>
+
+<section class="slide">
+<h2>What we're <em>not</em> doing</h2>
+<ul>
+<li>New plans / pricing changes — frozen for the quarter.</li>
+<li>Public API v2 — rolls into Q4.</li>
+<li>The big import-from-Notion ask — wait list grows, scope doesn't change.</li>
+</ul>
+</section>
+
+<section class="slide">
+<div class="eyebrow">Aurora · Q3 kickoff</div>
+<h1>Questions?</h1>
+<p class="lede">Slack #q3-bets · post-it cards in the kitchen for written ones.</p>
+</section>
+
+</div>
+
+<nav class="controls">
+<button id="prev">←</button>
+<span id="ctr">1 / 8</span>
+<button id="next">→</button>
+<span style="margin-left:8px">space · ←/→ · home/end · ⌘P prints</span>
+</nav>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let i=0;
+function show(n){
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+  document.getElementById('ctr').textContent=(i+1)+' / '+slides.length;
+  document.getElementById('pageno').textContent=(i+1)+'/'+slides.length;
+  document.getElementById('prog').style.width=((i+1)/slides.length*100)+'%';
+}
+document.getElementById('prev').onclick=()=>show(i-1);
+document.getElementById('next').onclick=()=>show(i+1);
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown') show(i+1);
+  else if(e.key==='ArrowLeft'||e.key==='PageUp') show(i-1);
+  else if(e.key==='Home') show(0);
+  else if(e.key==='End') show(slides.length-1);
+});
+show(0);
+</script>
+</body>
+</html>

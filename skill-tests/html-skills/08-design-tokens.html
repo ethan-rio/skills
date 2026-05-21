@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aurora design tokens</title>
+<style>
+:root{
+  /* tokens */
+  --c-ink-900:#0a0a0a; --c-ink-700:#262626; --c-ink-500:#525252; --c-ink-300:#a3a3a3; --c-ink-100:#f5f5f4;
+  --c-paper:#fafaf7;
+  --c-brand-50:#eef2ff; --c-brand-300:#a5b4fc; --c-brand-500:#6366f1; --c-brand-700:#4338ca; --c-brand-900:#1e1b4b;
+  --c-acc-amber:#f59e0b; --c-acc-rose:#e11d48; --c-acc-jade:#10b981; --c-acc-sky:#0ea5e9;
+  --c-state-ok:#16a34a; --c-state-warn:#d97706; --c-state-err:#dc2626; --c-state-info:#2563eb;
+  --t-display: 'Fraunces', Georgia, serif;
+  --t-sans: Inter, system-ui, -apple-system, sans-serif;
+  --t-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px; --s-7:48px; --s-8:64px;
+  --r-sm:4px; --r-md:8px; --r-lg:14px; --r-pill:99px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 14px rgba(0,0,0,.08);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--c-paper);color:var(--c-ink-900);font-family:var(--t-sans);font-size:14px;line-height:1.55}
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+.wrap{max-width:1180px;margin:0 auto;padding:36px 22px 60px}
+header{margin-bottom:30px;border-bottom:1px solid var(--c-ink-300);padding-bottom:18px}
+.eyebrow{font-family:var(--t-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--c-ink-500)}
+h1{font-family:var(--t-display);font-size:46px;margin:6px 0 6px;font-weight:600;letter-spacing:-.02em}
+.dek{color:var(--c-ink-500);max-width:62ch}
+section{margin:34px 0}
+section h2{font-family:var(--t-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--c-ink-500);margin:0 0 14px;border-top:1px solid var(--c-ink-300);padding-top:14px}
+.swatchgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:780px){.swatchgrid{grid-template-columns:repeat(2,1fr)}}
+.sw{border:1px solid var(--c-ink-300);border-radius:var(--r-md);overflow:hidden;cursor:copy;background:#fff;transition:transform .15s}
+.sw:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.sw .chip{height:96px;border-bottom:1px solid var(--c-ink-300)}
+.sw .meta{padding:8px 10px;font-family:var(--t-mono);font-size:11px}
+.sw .meta .name{font-weight:600;color:var(--c-ink-700);display:block}
+.sw .meta .val{color:var(--c-ink-500)}
+.typescale{display:grid;gap:14px}
+.t-row{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline;border-bottom:1px dashed var(--c-ink-300);padding-bottom:8px}
+.t-row .tag{font-family:var(--t-mono);font-size:11px;color:var(--c-ink-500)}
+.spaceRow{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.box{background:var(--c-brand-500);height:24px;border-radius:var(--r-sm)}
+.spaceRow .lab{font-family:var(--t-mono);font-size:10.5px;color:var(--c-ink-500);display:block;margin-top:6px;text-align:center}
+.radii{display:flex;gap:14px;flex-wrap:wrap}
+.rad{width:84px;height:84px;background:var(--c-brand-500);display:grid;place-items:center;color:#fff;font:600 11px var(--t-mono)}
+.shadows{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:680px){.shadows{grid-template-columns:1fr}}
+.sb{background:#fff;border:1px solid var(--c-ink-300);border-radius:var(--r-md);padding:18px;text-align:center;font-family:var(--t-mono);font-size:11px;color:var(--c-ink-500)}
+.sb.sm{box-shadow:var(--shadow-sm)} .sb.md{box-shadow:var(--shadow-md)} .sb.lg{box-shadow:var(--shadow-lg)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--c-ink-900);color:#fff;padding:9px 14px;border-radius:var(--r-md);font:12px var(--t-mono);opacity:0;transition:opacity .25s}
+.toast.show{opacity:1}
+footer{margin-top:50px;color:var(--c-ink-500);font-family:var(--t-mono);font-size:11px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--c-ink-300);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="eyebrow">Design tokens · Aurora · v1.0</div>
+<h1>Tokens we ship to Figma &amp; the codebase</h1>
+<p class="dek">Single source of truth for color, type, spacing, radius, and shadow. Click any swatch to copy its var name. Tokens come from <code>/packages/tokens/aurora.css</code>.</p>
+</header>
+
+<section>
+<h2>Color · Ink &amp; paper</h2>
+<div class="swatchgrid" id="ink"></div>
+</section>
+
+<section>
+<h2>Color · Brand</h2>
+<div class="swatchgrid" id="brand"></div>
+</section>
+
+<section>
+<h2>Color · Accents &amp; states</h2>
+<div class="swatchgrid" id="acc"></div>
+</section>
+
+<section>
+<h2>Type scale</h2>
+<div class="typescale" id="type"></div>
+</section>
+
+<section>
+<h2>Spacing scale</h2>
+<div class="spaceRow" id="space"></div>
+</section>
+
+<section>
+<h2>Radii</h2>
+<div class="radii">
+<div class="rad" style="border-radius:var(--r-sm)">sm · 4</div>
+<div class="rad" style="border-radius:var(--r-md)">md · 8</div>
+<div class="rad" style="border-radius:var(--r-lg)">lg · 14</div>
+<div class="rad" style="border-radius:var(--r-pill)">pill · 99</div>
+</div>
+</section>
+
+<section>
+<h2>Shadows</h2>
+<div class="shadows">
+<div class="sb sm">--shadow-sm</div>
+<div class="sb md">--shadow-md</div>
+<div class="sb lg">--shadow-lg</div>
+</div>
+</section>
+
+<footer>
+<span>Last updated 2026-05-21 · token source: aurora.css</span>
+<span>click swatches to copy var name</span>
+</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="./_submit-handler.js"></script>
+<script>
+function chip(parent, vname, hex){
+  const el=document.createElement('div'); el.className='sw';
+  const c=document.createElement('div'); c.className='chip'; c.style.background='var('+vname+')';
+  const m=document.createElement('div'); m.className='meta';
+  const n=document.createElement('span'); n.className='name'; n.textContent=vname;
+  const v=document.createElement('span'); v.className='val'; v.textContent=hex;
+  m.append(n,v); el.append(c,m);
+  el.addEventListener('click', ()=>{
+    copyToClipboard(vname, {message:'copied '+vname});
+  });
+  parent.appendChild(el);
+}
+const groups = {
+  ink: [['--c-ink-900','#0a0a0a'],['--c-ink-700','#262626'],['--c-ink-500','#525252'],['--c-ink-300','#a3a3a3'],['--c-paper','#fafaf7']],
+  brand: [['--c-brand-50','#eef2ff'],['--c-brand-300','#a5b4fc'],['--c-brand-500','#6366f1'],['--c-brand-700','#4338ca'],['--c-brand-900','#1e1b4b']],
+  acc: [['--c-acc-amber','#f59e0b'],['--c-acc-rose','#e11d48'],['--c-acc-jade','#10b981'],['--c-acc-sky','#0ea5e9'],['--c-state-err','#dc2626']]
+};
+for(const [g, items] of Object.entries(groups)){
+  const root=document.getElementById(g);
+  items.forEach(([v,hex])=>chip(root,v,hex));
+}
+
+const typeScale = [
+  ['display-xl','var(--t-display)','46/1.05/600','The quick brown fox'],
+  ['display','var(--t-display)','32/1.1/600','Editorial heading'],
+  ['title','var(--t-sans)','22/1.25/700','Section title'],
+  ['body','var(--t-sans)','15/1.55/400','Body copy. Reads cleanly at long lengths.'],
+  ['caption','var(--t-mono)','12/1.4/400','caption · metadata · footnotes'],
+];
+const tt=document.getElementById('type');
+typeScale.forEach(([n,fam,style,sample])=>{
+  const [size,lh,wt]=style.split('/');
+  const row=document.createElement('div'); row.className='t-row';
+  const tag=document.createElement('div'); tag.className='tag';
+  tag.textContent = n+' · '+style;
+  const sample_el=document.createElement('div');
+  sample_el.style.font = `${wt} ${size}px/${lh} ${fam}`;
+  sample_el.textContent = sample;
+  row.append(tag, sample_el);
+  tt.appendChild(row);
+});
+
+const sp=[['s-1',4],['s-2',8],['s-3',12],['s-4',16],['s-5',24],['s-6',32],['s-7',48],['s-8',64]];
+const sr=document.getElementById('space');
+sp.forEach(([n,px])=>{
+  const w=document.createElement('div'); w.style.width=px+'px';
+  const b=document.createElement('div'); b.className='box'; b.style.width=px+'px';
+  const l=document.createElement('span'); l.className='lab'; l.textContent=n+' · '+px;
+  w.append(b,l); sr.appendChild(w);
+});
+</script>
+</body>
+</html>

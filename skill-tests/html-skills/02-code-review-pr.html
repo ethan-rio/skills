@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PR #4127 — Rate limiter rewrite</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1c2129; --rule:#30363d;
+  --ink:#c9d1d9; --mute:#8b949e; --link:#58a6ff;
+  --add:#1a3326; --add2:#2ea04340; --add-ink:#3fb950;
+  --del:#3a1d1f; --del2:#f8514940; --del-ink:#f85149;
+  --warn:#3d2e0c; --warn-ink:#d29922;
+  --crit:#3a1014; --crit-ink:#ff7b72;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:-apple-system,Segoe UI,Roboto,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:24px;display:grid;grid-template-columns:220px 1fr;gap:24px}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+nav{position:sticky;top:24px;align-self:start;font-size:13px}
+nav h2{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute);margin:0 0 8px}
+nav ol{padding-left:20px;margin:0 0 18px}
+nav a{color:var(--link);text-decoration:none}
+nav a:hover{text-decoration:underline}
+header{margin-bottom:18px}
+.eyebrow{font-size:12px;color:var(--mute)}
+h1{font-size:22px;margin:4px 0 6px;font-weight:600}
+.meta{display:flex;gap:14px;flex-wrap:wrap;color:var(--mute);font-size:13px}
+.badge{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--rule)}
+.badge.crit{color:var(--crit-ink);border-color:var(--crit-ink);background:var(--crit)}
+.badge.warn{color:var(--warn-ink);border-color:var(--warn-ink);background:var(--warn)}
+.badge.nit{color:var(--mute);border-color:var(--rule)}
+.summary{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;margin-bottom:22px}
+.summary h2{margin:0 0 8px;font-size:14px}
+.file{background:var(--panel);border:1px solid var(--rule);border-radius:8px;margin-bottom:18px;overflow:hidden}
+.file-h{background:var(--panel2);padding:8px 12px;font-family:var(--mono);font-size:13px;display:flex;justify-content:space-between;border-bottom:1px solid var(--rule)}
+.diff{display:grid;grid-template-columns:1fr 380px}
+@media(max-width:900px){.diff{grid-template-columns:1fr}}
+pre{margin:0;padding:0;font-family:var(--mono);font-size:12.5px;line-height:1.6;overflow-x:auto}
+.line{display:grid;grid-template-columns:48px 32px 1fr;align-items:start}
+.line .ln{color:var(--mute);text-align:right;padding:0 8px;user-select:none;border-right:1px solid var(--rule)}
+.line .gut{color:var(--mute);text-align:center;user-select:none}
+.line .src{padding:0 12px;white-space:pre}
+.line.add{background:var(--add)}
+.line.add .gut{color:var(--add-ink)}
+.line.del{background:var(--del)}
+.line.del .gut{color:var(--del-ink)}
+.line.hunk{background:#0a3163;color:#79c0ff;font-style:italic}
+.line.hunk .src{color:#79c0ff}
+.notes{border-left:1px solid var(--rule);background:var(--panel2);padding:8px 0;font-size:13px}
+.note{padding:8px 14px;margin:0 0 8px;border-bottom:1px solid var(--rule)}
+.note .head{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.note .ref{font-family:var(--mono);font-size:11px;color:var(--mute);cursor:pointer}
+.note .ref:hover{color:var(--link)}
+.toc{padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--mute)}
+.toc .badge{cursor:default}
+footer{color:var(--mute);font-size:12px;margin-top:30px;border-top:1px solid var(--rule);padding-top:14px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h2>Files (3)</h2>
+  <ol>
+    <li><a href="#f1">limiter.go</a></li>
+    <li><a href="#f2">limiter_test.go</a></li>
+    <li><a href="#f3">middleware.go</a></li>
+  </ol>
+  <h2>Findings</h2>
+  <ol>
+    <li><a href="#n1"><span class="badge crit">crit</span> race in Acquire</a></li>
+    <li><a href="#n2"><span class="badge warn">warn</span> magic 60s</a></li>
+    <li><a href="#n3"><span class="badge warn">warn</span> err discarded</a></li>
+    <li><a href="#n4"><span class="badge nit">nit</span> rename</a></li>
+  </ol>
+</nav>
+<main>
+<header>
+  <div class="eyebrow">Pull request review · author <b>@erin</b> · 412 lines changed</div>
+  <h1>#4127 — Replace token-bucket limiter with sliding-window counter</h1>
+  <div class="meta">
+    <span><span class="badge crit">1 critical</span></span>
+    <span><span class="badge warn">2 warnings</span></span>
+    <span><span class="badge nit">1 nit</span></span>
+    <span>· branch <code>erin/sliding-window</code> · base <code>main</code></span>
+  </div>
+</header>
+
+<div class="summary">
+<h2>What this PR does</h2>
+<p>Swaps the per-route token-bucket rate limiter for a Redis-backed sliding-window counter. Goal: stop the 1-second burst-then-pause pattern that's been tripping our SLO alerts. Affects every authenticated API route via middleware.</p>
+<p><b>Focus areas:</b> concurrency in <code>Acquire</code> and the new Redis Lua script. Skim the test additions.</p>
+</div>
+
+<section class="file" id="f1">
+  <div class="file-h"><span>pkg/limiter/limiter.go</span><span>+78 −34</span></div>
+  <div class="toc"><span class="badge crit">crit</span><span class="badge warn">warn</span></div>
+  <div class="diff">
+    <pre>
+<span class="line hunk"><span class="ln"></span><span class="gut"></span><span class="src">@@ -22,12 +22,28 @@ func (l *Limiter) Acquire(ctx context.Context, key string) (bool, error) {</span></span>
+<span class="line del"><span class="ln">22</span><span class="gut">−</span><span class="src">  l.mu.Lock()</span></span>
+<span class="line del"><span class="ln">23</span><span class="gut">−</span><span class="src">  defer l.mu.Unlock()</span></span>
+<span class="line del"><span class="ln">24</span><span class="gut">−</span><span class="src">  bucket := l.buckets[key]</span></span>
+<span class="line del"><span class="ln">25</span><span class="gut">−</span><span class="src">  return bucket.take(1), nil</span></span>
+<span class="line add"><span class="ln">22</span><span class="gut">+</span><span class="src">  now := time.Now().UnixMilli()</span></span>
+<span class="line add"><span class="ln">23</span><span class="gut">+</span><span class="src">  count, err := l.redis.Eval(ctx, slidingWindowLua,</span></span>
+<span class="line add"><span class="ln">24</span><span class="gut">+</span><span class="src">    []string{key}, now, l.windowMs, l.limit).Int64()</span></span>
+<span class="line add"><span class="ln">25</span><span class="gut">+</span><span class="src">  if err != nil {</span></span>
+<span class="line add"><span class="ln">26</span><span class="gut">+</span><span class="src">    return true, nil  // ← fail open. is this what we want?</span></span>
+<span class="line add"><span class="ln">27</span><span class="gut">+</span><span class="src">  }</span></span>
+<span class="line add"><span class="ln">28</span><span class="gut">+</span><span class="src">  return count <= l.limit, nil</span></span>
+    </pre>
+    <div class="notes">
+      <div class="note" id="n1">
+        <div class="head"><span class="badge crit">CRITICAL</span><span class="ref">limiter.go:23 →</span></div>
+        <p>The Lua script runs on Redis but you're computing <code>now</code> on the app server. Two app servers with skewed clocks will produce non-monotonic windows for the same key. Take <code>now</code> inside the Lua via <code>redis.call('TIME')</code> instead.</p>
+      </div>
+      <div class="note" id="n3">
+        <div class="head"><span class="badge warn">WARN</span><span class="ref">limiter.go:26 →</span></div>
+        <p><b>Err discarded.</b> Returning <code>true, nil</code> on Redis error means a network blip silently disables the limiter. At minimum log it; better, take a fail-closed path with a second-of-grace circuit breaker.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="file" id="f2">
+  <div class="file-h"><span>pkg/limiter/limiter_test.go</span><span>+102 −0</span></div>
+  <div class="toc"><span class="badge nit">nit</span></div>
+  <div class="diff">
+    <pre>
+<span class="line hunk"><span class="ln"></span><span class="gut"></span><span class="src">@@ -0,0 +1,102 @@ + new file</span></span>
+<span class="line add"><span class="ln">1</span><span class="gut">+</span><span class="src">func TestSlidingWindow_Basic(t *testing.T) {</span></span>
+<span class="line add"><span class="ln">2</span><span class="gut">+</span><span class="src">  l := newTestLimiter(t, 10, time.Second)</span></span>
+<span class="line add"><span class="ln">3</span><span class="gut">+</span><span class="src">  for i := 0; i < 10; i++ { ok, _ := l.Acquire(ctx, "k"); assert.True(t, ok) }</span></span>
+<span class="line add"><span class="ln">4</span><span class="gut">+</span><span class="src">  ok, _ := l.Acquire(ctx, "k"); assert.False(t, ok)</span></span>
+<span class="line add"><span class="ln">5</span><span class="gut">+</span><span class="src">}</span></span>
+    </pre>
+    <div class="notes">
+      <div class="note" id="n4">
+        <div class="head"><span class="badge nit">NIT</span><span class="ref">limiter_test.go:1</span></div>
+        <p>Consider table-driven tests for the boundary cases (window edges, clock skew). Not blocking.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="file" id="f3">
+  <div class="file-h"><span>internal/http/middleware.go</span><span>+18 −9</span></div>
+  <div class="toc"><span class="badge warn">warn</span></div>
+  <div class="diff">
+    <pre>
+<span class="line hunk"><span class="ln"></span><span class="gut"></span><span class="src">@@ -41,6 +41,9 @@ func RateLimit(l *limiter.Limiter) gin.HandlerFunc {</span></span>
+<span class="line del"><span class="ln">41</span><span class="gut">−</span><span class="src">    key := c.ClientIP()</span></span>
+<span class="line add"><span class="ln">41</span><span class="gut">+</span><span class="src">    key := c.GetString("user_id")  // hard-coded</span></span>
+<span class="line add"><span class="ln">42</span><span class="gut">+</span><span class="src">    if key == "" { key = c.ClientIP() }</span></span>
+<span class="line add"><span class="ln">43</span><span class="gut">+</span><span class="src">    window := 60 * time.Second</span></span>
+    </pre>
+    <div class="notes">
+      <div class="note" id="n2">
+        <div class="head"><span class="badge warn">WARN</span><span class="ref">middleware.go:43 →</span></div>
+        <p><b>Magic 60s.</b> Hard-coded window violates the per-route config we just added in #4099. Pull it from <code>route.Limit.Window</code> like the rest.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>Reviewed 2026-05-21 · last commit <code>a4f9c2e</code> · re-request review after fixes</footer>
+</main>
+</div>
+</body>
+</html>

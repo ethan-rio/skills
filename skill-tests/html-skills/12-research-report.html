@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>How does our rate limiter actually work?</title>
+<style>
+:root{
+  --paper:#fbfaf6; --ink:#171513; --rule:#cdc7b8; --mute:#6b6357; --accent:#0e7490; --warn:#b45309;
+  --serif:'Iowan Old Style','Georgia',serif; --sans:Inter,system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.7}
+.wrap{max-width:780px;margin:0 auto;padding:48px 24px 80px}
+header{margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+h1{font-size:42px;line-height:1.1;margin:8px 0 12px;font-weight:700;letter-spacing:-.02em}
+.dek{color:var(--mute);font-style:italic;font-size:18px;max-width:62ch}
+.tldr{background:#f5efdc;border-left:4px solid var(--accent);padding:14px 18px;margin:24px 0;border-radius:0 6px 6px 0;font-size:15.5px}
+.tldr h3{margin:0 0 4px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--accent);text-transform:uppercase}
+h2{font-family:var(--sans);font-size:22px;margin:42px 0 8px;font-weight:700;letter-spacing:-.01em;border-top:1px solid var(--rule);padding-top:24px}
+h3{font-family:var(--sans);font-size:16px;margin:24px 0 8px;font-weight:700}
+p{margin:0 0 16px}
+details{margin:14px 0;border:1px solid var(--rule);border-radius:6px;background:#fff}
+details summary{cursor:pointer;padding:10px 14px;font-family:var(--mono);font-size:12.5px;color:var(--accent);background:#f5efdc;border-radius:5px}
+details[open] summary{border-bottom:1px solid var(--rule);border-radius:5px 5px 0 0}
+details .body{padding:14px}
+.tabs{margin:18px 0}
+.tabbar{display:flex;gap:2px;border-bottom:1px solid var(--rule)}
+.tabbar button{font:inherit;font-family:var(--mono);font-size:12px;background:transparent;color:var(--mute);border:0;padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent}
+.tabbar button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tab-body{display:none;background:#171513;color:#fbfaf6;padding:14px;border-radius:0 6px 6px 6px;font-family:var(--mono);font-size:13px;line-height:1.6;overflow-x:auto}
+.tab-body.on{display:block}
+.callout{background:#fff7ec;border-left:4px solid var(--warn);padding:12px 16px;margin:18px 0;border-radius:0 6px 6px 0;font-size:15px}
+.callout strong{color:var(--warn);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.diagram{background:#fff;border:1px solid var(--rule);padding:20px;border-radius:8px;margin:18px 0}
+svg{display:block;max-width:100%}
+.faq dt{font-weight:700;margin-top:12px}
+.faq dd{margin:0 0 10px;color:var(--mute)}
+.glossary{background:#f5efdc;padding:14px 18px;border-radius:6px;font-size:14px;margin:18px 0}
+.glossary dt{font-family:var(--mono);font-size:12px;color:var(--accent);margin-top:8px}
+.glossary dt:first-child{margin-top:0}
+footer{margin-top:60px;font-family:var(--mono);font-size:11px;color:var(--mute);border-top:1px solid var(--rule);padding-top:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media print{details[open] summary,.tab-body.on{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="eyebrow">Engineering · feature explainer</div>
+<h1>How does our rate limiter actually work?</h1>
+<p class="dek">A from-scratch tour for someone who has touched the limiter once and wants the mental model — token bucket, Redis, and the two foot-guns that bit us last quarter.</p>
+</header>
+
+<div class="tldr">
+<h3>TL;DR</h3>
+<p>One <em>shared</em> Redis-backed token bucket per (user × route-group). The Lua script atomically refills, deducts, and returns the new count. App code only decides "did I get a token?". Two gotchas: clock skew across app servers, and the silent fail-open path on Redis errors.</p>
+</div>
+
+<h2>1 · The flow at a glance</h2>
+<div class="diagram">
+<svg viewBox="0 0 720 200" role="img" aria-label="rate limiter flow">
+<defs>
+  <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#171513"/>
+  </marker>
+</defs>
+<g font-family="Inter" font-size="12">
+  <rect x="20" y="60" width="140" height="60" fill="#fff" stroke="#171513" rx="6"/>
+  <foreignObject x="28" y="68" width="124" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="font:13px Inter">Request<br/><small style="color:#6b6357">middleware</small></div></foreignObject>
+
+  <rect x="220" y="60" width="160" height="60" fill="#ecfeff" stroke="#0e7490" rx="6"/>
+  <foreignObject x="228" y="68" width="144" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="font:13px Inter"><b>Lua eval</b> on Redis<br/><small style="color:#6b6357">refill + take 1</small></div></foreignObject>
+
+  <rect x="430" y="60" width="120" height="60" fill="#fff" stroke="#171513" rx="6"/>
+  <foreignObject x="438" y="68" width="104" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="font:13px Inter">tokens ≥ 1?<br/><small style="color:#6b6357">decision</small></div></foreignObject>
+
+  <rect x="600" y="20" width="100" height="50" fill="#f0fdf4" stroke="#15803d" rx="6"/>
+  <text x="650" y="50" text-anchor="middle">accept</text>
+
+  <rect x="600" y="110" width="100" height="50" fill="#fef2f2" stroke="#b91c1c" rx="6"/>
+  <text x="650" y="140" text-anchor="middle">429</text>
+
+  <line x1="160" y1="90" x2="220" y2="90" stroke="#171513" marker-end="url(#m)"/>
+  <line x1="380" y1="90" x2="430" y2="90" stroke="#171513" marker-end="url(#m)"/>
+  <line x1="550" y1="80" x2="600" y2="50" stroke="#15803d" marker-end="url(#m)"/>
+  <line x1="550" y1="100" x2="600" y2="135" stroke="#b91c1c" marker-end="url(#m)"/>
+</g>
+</svg>
+</div>
+
+<h2>2 · The Lua script</h2>
+<p>Atomicity is the whole reason this lives in Redis. App servers compute nothing about the bucket — they just hand keys and parameters to Lua and read back a boolean.</p>
+
+<div class="tabs">
+<div class="tabbar">
+<button class="on" data-tab="lua">limiter.lua</button>
+<button data-tab="go">middleware.go</button>
+<button data-tab="cfg">routes.yaml</button>
+</div>
+<div class="tab-body on" data-tab="lua">-- KEYS[1] = bucket key, ARGV = now_ms, capacity, refill_per_sec, take
+local bucket = redis.call('HMGET', KEYS[1], 'tokens', 'ts')
+local cap, refill, take = tonumber(ARGV[2]), tonumber(ARGV[3]), tonumber(ARGV[4])
+local now = tonumber(redis.call('TIME')[1]) * 1000   -- &lt;-- not ARGV[1]; clock-safe
+local tokens, ts = tonumber(bucket[1]) or cap, tonumber(bucket[2]) or now
+local elapsed = math.max(0, (now - ts) / 1000)
+tokens = math.min(cap, tokens + elapsed * refill)
+local ok = 0
+if tokens &gt;= take then tokens = tokens - take; ok = 1 end
+redis.call('HMSET', KEYS[1], 'tokens', tokens, 'ts', now)
+redis.call('PEXPIRE', KEYS[1], 60000)
+return { ok, tokens }</div>
+
+<div class="tab-body" data-tab="go">// per-request, after authn
+key := userID + ":" + routeGroup
+ok, _, err := limiter.Eval(ctx, key, group.Capacity, group.RefillPerSec, 1)
+if err != nil {
+    metrics.LimiterErr.Inc()
+    return nextHandler() // fail-open — see callout
+}
+if !ok { return c.JSON(429, retryAfter(group)) }
+return nextHandler()</div>
+
+<div class="tab-body" data-tab="cfg">groups:
+  api:    { capacity: 60, refill_per_sec: 1   }
+  search: { capacity: 30, refill_per_sec: 0.5 }
+  upload: { capacity: 5,  refill_per_sec: 0.1 }</div>
+</div>
+
+<h2>3 · Walk-through: what happens on a request</h2>
+<details><summary>Step 1 · middleware.go computes the bucket key</summary>
+<div class="body"><p>The key is <code>rl:&lt;userID&gt;:&lt;group&gt;</code> for authenticated users, or <code>rl:ip:&lt;ip&gt;:&lt;group&gt;</code> for anonymous. Group comes from <code>routes.yaml</code>; if a route is missing a group it falls into <code>api</code> by default.</p></div></details>
+<details><summary>Step 2 · Redis runs limiter.lua atomically</summary>
+<div class="body"><p>Lua reads the bucket hash, computes elapsed time using <em>Redis's clock</em> (this is the fix for the bug that bit us — see §5), refills, deducts 1, persists, and returns <code>(ok, remaining)</code>.</p></div></details>
+<details><summary>Step 3 · App returns 429 or proceeds</summary>
+<div class="body"><p>On <code>ok=0</code> we return 429 with a <code>Retry-After</code> header derived from refill rate. On <code>ok=1</code> we attach <code>X-RateLimit-Remaining</code> and continue.</p></div></details>
+<details><summary>Step 4 · Bucket TTL and cleanup</summary>
+<div class="body"><p>Every Lua call <code>PEXPIRE</code>s the key for 60s. So idle users' buckets disappear automatically — no GC job needed.</p></div></details>
+
+<h2>4 · Foot-guns</h2>
+<div class="callout"><strong>Gotcha 1 · clock skew</strong> Pre-2026-02 the script took <code>now</code> from the calling app server. Two app servers with skewed NTP would alternately advance and rewind the bucket's <code>ts</code> for the same key. Symptom: users seeing burst-then-stall behavior. Fix: <code>redis.call('TIME')</code> inside Lua. Always.</div>
+
+<div class="callout"><strong>Gotcha 2 · fail-open silently</strong> Redis transient errors return <code>nextHandler()</code>. That means a Redis blip silently disables the limiter. We accept this trade-off (availability over correctness) but we instrument <code>limiter.err</code> and alert on sustained nonzero. Don't remove the alert.</div>
+
+<h2>5 · FAQ</h2>
+<dl class="faq">
+<dt>Is this distributed rate limiting?</dt>
+<dd>Yes — Redis is the single source of truth. Any number of app servers, any number of pods, single bucket per user×group.</dd>
+<dt>What about bursts during deploys?</dt>
+<dd>Token bucket is bursty by design (capacity = burst budget). If you don't want bursts, switch to a sliding window — see #4127.</dd>
+<dt>Why not <code>RATELIMIT</code> from Redis modules?</dt>
+<dd>We can't deploy modules on managed Redis. The 12-line Lua we own is fine.</dd>
+</dl>
+
+<div class="glossary">
+<dt>token bucket</dt><dd>An algorithm where tokens accumulate at a fixed rate, capped at a capacity; each request takes a token; rejects when empty.</dd>
+<dt>fail-open</dt><dd>When the limiter errors, requests pass through unrestricted. Opposite: fail-closed (reject all).</dd>
+<dt>PEXPIRE</dt><dd>Redis command to set a millisecond TTL on a key.</dd>
+</div>
+
+<footer>
+<span>Last updated 2026-05-21 · code excerpts from limiter.lua@a4f9c2e</span>
+<span>related: PR #4127 (sliding window proposal) · runbook RT-12</span>
+</footer>
+</div>
+
+<script>
+document.querySelectorAll('.tabbar button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.tabbar button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.tab-body').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.querySelector('.tab-body[data-tab="'+b.dataset.tab+'"]').classList.add('on');
+  });
+});
+</script>
+</body>
+</html>

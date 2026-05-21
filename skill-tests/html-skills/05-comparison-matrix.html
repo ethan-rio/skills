@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Vector DB — Decision matrix</title>
+<style>
+:root{
+  --bg:#0e1116; --panel:#161b22; --rule:#2a313c; --ink:#e6e8eb; --mute:#8a93a0;
+  --good:#3fb950; --mid:#d29922; --bad:#f85149; --accent:#79c0ff;
+  --mono:ui-monospace,Menlo,monospace; --sans:Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+.wrap{max-width:1200px;margin:0 auto;padding:30px 22px 60px}
+header{margin-bottom:18px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+h1{font-size:28px;margin:6px 0 4px;font-weight:600;letter-spacing:-.01em}
+.dek{color:var(--mute);max-width:70ch}
+.controls{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px 18px;margin:18px 0;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media(max-width:780px){.controls{grid-template-columns:repeat(2,1fr)}}
+.weight label{display:block;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin-bottom:6px}
+.weight input[type=range]{width:100%}
+.weight .v{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--panel);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{background:#1c222b;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+td.cell{position:relative}
+.bar{position:absolute;inset:0;opacity:.16;pointer-events:none}
+.cell .v{font-weight:600;font-family:var(--mono)}
+.cell .note{font-size:12px;color:var(--mute);display:block;margin-top:2px}
+.scoreCol{font-family:var(--mono);font-weight:700;color:var(--accent)}
+.winner{outline:2px solid var(--good);outline-offset:-2px}
+.legend{font-size:12px;color:var(--mute);margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono)}
+.legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.l5::before{background:var(--good)} .l4::before{background:#9ec941} .l3::before{background:var(--mid)} .l2::before{background:#e07a3a} .l1::before{background:var(--bad)}
+button{font-family:var(--mono);font-size:12px;padding:8px 14px;background:var(--accent);color:#0e1116;border:0;border-radius:4px;cursor:pointer;font-weight:600}
+.actions{margin-top:20px;display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+.verdict{margin-top:18px;padding:14px 18px;border:1px solid var(--rule);border-radius:8px;background:var(--panel)}
+.verdict h2{margin:0 0 6px;font-size:14px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.verdict .pick{font-size:20px;font-weight:600;color:var(--good)}
+footer{color:var(--mute);font-size:12px;font-family:var(--mono);margin-top:30px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--rule);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="eyebrow">Decision matrix · 4 candidates × 5 criteria</div>
+<h1>Picking a vector database for the search service</h1>
+<p class="dek">Drag the weight sliders to reflect what matters most for our case. Scores update live; the leader gets a green outline and is recommended below.</p>
+</header>
+
+<div class="controls" id="weights"></div>
+
+<table id="grid">
+<thead><tr><th style="width:140px">Candidate</th></tr></thead>
+<tbody></tbody>
+</table>
+
+<div class="legend">
+<span class="l5">5 / strong</span>
+<span class="l4">4</span>
+<span class="l3">3 / okay</span>
+<span class="l2">2</span>
+<span class="l1">1 / weak</span>
+</div>
+
+<div class="verdict" id="verdict"></div>
+<div class="actions"><button id="submit">Submit verdict →</button></div>
+
+<footer>
+<span>Last updated 2026-05-21 · weights are subjective; scores are best-guess from team experience</span>
+<span>verdicts are reproducible — submit copies the full state</span>
+</footer>
+</div>
+
+<script src="./_submit-handler.js"></script>
+<script>
+const criteria = [
+  {id:'qps',    name:'Throughput',     desc:'qps at p95 < 200ms', weight:7},
+  {id:'ops',    name:'Ops cost',       desc:'how painful to run', weight:8},
+  {id:'cost',   name:'$ at scale',     desc:'per million vectors / month', weight:6},
+  {id:'flex',   name:'Hybrid search',  desc:'BM25 + vector + filters', weight:9},
+  {id:'matur',  name:'Maturity',       desc:'1.0+ release, prod stories', weight:5}
+];
+const candidates = [
+  {id:'pinecone', name:'Pinecone', scores:{qps:5,ops:5,cost:2,flex:3,matur:5}, notes:{qps:'serverless scales',ops:'fully managed',cost:'expensive at 10M+',flex:'metadata filters only',matur:'shipping since 2019'}},
+  {id:'qdrant',   name:'Qdrant',   scores:{qps:4,ops:3,cost:5,flex:5,matur:4}, notes:{qps:'good Rust core',ops:'self-host or cloud',cost:'cheap to self-host',flex:'native hybrid + payload',matur:'1.x stable'}},
+  {id:'weaviate', name:'Weaviate', scores:{qps:4,ops:3,cost:4,flex:5,matur:4}, notes:{qps:'graphql adds latency',ops:'k8s operator usable',cost:'mid',flex:'modules + hybrid',matur:'lots of prod users'}},
+  {id:'pg',       name:'pgvector', scores:{qps:3,ops:5,cost:5,flex:4,matur:5}, notes:{qps:'fine to ~1M',ops:'Postgres we already run',cost:'effectively free',flex:'SQL filters native',matur:'12+ Postgres years'}}
+];
+
+const w = document.getElementById('weights');
+criteria.forEach(c=>{
+  const div=document.createElement('div'); div.className='weight';
+  const lab=document.createElement('label'); lab.htmlFor=c.id;
+  const sn=document.createElement('span'); sn.textContent=c.name+' '; lab.appendChild(sn);
+  const sv=document.createElement('span'); sv.className='v'; sv.id=c.id+'_v'; sv.textContent='×'+c.weight; lab.appendChild(sv);
+  const sub=document.createElement('div'); sub.style.fontSize='11px'; sub.style.color='var(--mute)'; sub.style.marginBottom='6px'; sub.textContent=c.desc;
+  const inp=document.createElement('input'); inp.type='range'; inp.min=0; inp.max=10; inp.value=c.weight; inp.id=c.id;
+  inp.addEventListener('input',()=>{ c.weight=+inp.value; sv.textContent='×'+c.weight; render(); });
+  div.append(lab,sub,inp); w.appendChild(div);
+});
+
+const head = document.querySelector('#grid thead tr');
+criteria.forEach(c=>{ const th=document.createElement('th'); th.textContent=c.name; head.appendChild(th); });
+const totalTh=document.createElement('th'); totalTh.textContent='Total'; head.appendChild(totalTh);
+
+const tb = document.querySelector('#grid tbody');
+candidates.forEach(cand=>{
+  const tr=document.createElement('tr'); tr.id='r_'+cand.id;
+  const tdName=document.createElement('td'); const b=document.createElement('b'); b.textContent=cand.name; tdName.appendChild(b); tr.appendChild(tdName);
+  criteria.forEach(c=>{
+    const td=document.createElement('td'); td.className='cell';
+    const bar=document.createElement('div'); bar.className='bar'; td.appendChild(bar);
+    const v=document.createElement('span'); v.className='v'; v.textContent=cand.scores[c.id]; td.appendChild(v);
+    const note=document.createElement('span'); note.className='note'; note.textContent=cand.notes[c.id]; td.appendChild(note);
+    tr.appendChild(td);
+  });
+  const tdT=document.createElement('td'); tdT.className='scoreCol'; tdT.id='t_'+cand.id; tr.appendChild(tdT);
+  tb.appendChild(tr);
+});
+
+function colorFor(v){
+  return ({1:'#f85149',2:'#e07a3a',3:'#d29922',4:'#9ec941',5:'#3fb950'})[v];
+}
+function render(){
+  const wsum = criteria.reduce((s,c)=>s+c.weight,0) || 1;
+  let best=null;
+  candidates.forEach(cand=>{
+    const tr=document.getElementById('r_'+cand.id);
+    let total=0;
+    criteria.forEach((c,i)=>{
+      const cell=tr.children[i+1];
+      const score=cand.scores[c.id];
+      total += score * c.weight;
+      cell.querySelector('.bar').style.background=colorFor(score);
+      cell.querySelector('.v').style.color=colorFor(score);
+    });
+    const norm = (total / (5*wsum)) * 100;
+    document.getElementById('t_'+cand.id).textContent = norm.toFixed(1);
+    if(!best || norm > best.score) best = {cand, score:norm};
+  });
+  document.querySelectorAll('#grid tbody tr').forEach(r=>r.classList.remove('winner'));
+  if(best){
+    document.getElementById('r_'+best.cand.id).classList.add('winner');
+    const v=document.getElementById('verdict');
+    v.textContent='';
+    const h=document.createElement('h2'); h.textContent='Recommended given current weights'; v.appendChild(h);
+    const p=document.createElement('div'); p.className='pick'; p.textContent=best.cand.name+'  ('+best.score.toFixed(1)+'/100)'; v.appendChild(p);
+    const sub=document.createElement('div'); sub.style.color='var(--mute)'; sub.style.fontSize='13px';
+    sub.textContent='Adjust weights above to test sensitivity. Submit to send the full verdict back.';
+    v.appendChild(sub);
+  }
+}
+render();
+
+document.getElementById('submit').addEventListener('click', async ()=>{
+  await submitToClaude({
+    skill:'html-comparison-matrix', kind:'matrix-verdict',
+    data:{
+      title:'vector db pick',
+      criteria: criteria.map(c=>({id:c.id, name:c.name, weight:c.weight})),
+      candidates: candidates.map(c=>({id:c.id, name:c.name, scores:c.scores}))
+    },
+    version:1
+  });
+});
+</script>
+</body>
+</html>

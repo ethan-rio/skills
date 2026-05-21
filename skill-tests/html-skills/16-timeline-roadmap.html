@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aurora Q3 — Roadmap</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --rule:#2a313c; --ink:#e6edf3; --mute:#8b949e;
+  --c-act:#3fb950; --c-rel:#79c0ff; --c-mob:#f59e0b; --c-ops:#a78bfa; --c-blk:#f85149;
+  --mono:'JetBrains Mono',ui-monospace,monospace; --sans:Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13px;line-height:1.5}
+.wrap{max-width:1320px;margin:0 auto;padding:24px 18px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px;border-bottom:1px solid var(--rule);padding-bottom:14px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+h1{font-size:24px;margin:6px 0;font-weight:600}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--mute)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend .sw{width:11px;height:11px;border-radius:2px;display:inline-block}
+.gantt{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px;overflow:auto}
+.gantt table{border-collapse:collapse;width:100%;min-width:1080px;font-family:var(--mono);font-size:12px}
+.gantt th, .gantt td{padding:0;border:0}
+.gantt thead th{padding:8px 6px;color:var(--mute);text-align:center;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--rule);font-weight:500}
+.gantt thead th.cat{text-align:left;padding-left:14px;width:200px}
+.gantt thead th.month{background:#1c222b;border-left:1px solid var(--rule);font-weight:600;color:var(--ink)}
+.gantt tbody td.lab{padding:9px 14px;color:var(--ink);font-size:13px;border-bottom:1px solid var(--rule)}
+.gantt tbody td.lab .sub{color:var(--mute);font-size:11px;display:block;margin-top:2px}
+.row-bar{position:relative;height:38px;border-bottom:1px solid var(--rule)}
+.bar{position:absolute;top:9px;height:20px;border-radius:5px;display:flex;align-items:center;padding:0 8px;color:#fff;font-size:11px;font-weight:600;box-shadow:0 1px 0 rgba(0,0,0,.4) inset;cursor:default}
+.bar.act{background:var(--c-act);color:#0d1117}
+.bar.rel{background:var(--c-rel);color:#0d1117}
+.bar.mob{background:var(--c-mob);color:#0d1117}
+.bar.ops{background:var(--c-ops);color:#fff}
+.bar.blk{background:var(--c-blk);color:#fff}
+.bar.ghost{opacity:.5;background:repeating-linear-gradient(45deg, var(--c-mob), var(--c-mob) 5px, #d68b04 5px, #d68b04 10px);color:#0d1117}
+.milestone{position:absolute;top:5px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid var(--ink)}
+.milestone .lab{position:absolute;top:14px;left:-28px;width:60px;text-align:center;color:var(--mute);font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em}
+.today{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed var(--c-blk);z-index:5}
+.today::before{content:'today';position:absolute;top:-22px;left:-18px;font-family:var(--mono);font-size:10px;color:var(--c-blk);background:var(--bg);padding:1px 4px}
+.section{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+@media(max-width:780px){.section{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px}
+.card h3{margin:0 0 8px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+ul{margin:0;padding-left:18px;font-size:13px}
+ul li{margin-bottom:4px}
+footer{color:var(--mute);font-family:var(--mono);font-size:11px;margin-top:30px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--rule);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div>
+<div class="eyebrow">Roadmap · Aurora · Q3 2026 (Jul–Sep)</div>
+<h1>Quarterly delivery plan</h1>
+</div>
+<div class="legend">
+<span><span class="sw" style="background:var(--c-act)"></span>Activation</span>
+<span><span class="sw" style="background:var(--c-rel)"></span>Reliability</span>
+<span><span class="sw" style="background:var(--c-mob)"></span>Mobile</span>
+<span><span class="sw" style="background:var(--c-ops)"></span>Ops/infra</span>
+<span><span class="sw" style="background:var(--c-blk)"></span>Blocker</span>
+<span style="margin-left:auto">▼ milestone</span>
+</div>
+</header>
+
+<div class="gantt">
+<table>
+<thead>
+<tr>
+<th class="cat">Workstream</th>
+<th class="month" colspan="4">July</th>
+<th class="month" colspan="4">August</th>
+<th class="month" colspan="4">September</th>
+</tr>
+<tr>
+<th class="cat"></th>
+<th>w27</th><th>w28</th><th>w29</th><th>w30</th>
+<th>w31</th><th>w32</th><th>w33</th><th>w34</th>
+<th>w35</th><th>w36</th><th>w37</th><th>w38</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="card">
+<h3>Key milestones</h3>
+<ul>
+<li>Jul 22 · onboarding A/B variants live</li>
+<li>Aug 15 · sliding-window limiter shipped</li>
+<li>Aug 28 · Yjs offline beta (Test Flight)</li>
+<li>Sep 12 · Q3 readout</li>
+</ul>
+</div>
+<div class="card">
+<h3>Risks &amp; ghost work</h3>
+<ul>
+<li><span style="color:var(--c-mob)">CRDT learning curve</span> — striped bar shows the slack we've built in</li>
+<li><span style="color:var(--c-blk)">Postgres 16 cutover</span> blocks limiter rewrite if not on prod by Aug 5</li>
+<li>Holidays in Aug; assume 70% capacity weeks 32–33</li>
+</ul>
+</div>
+</div>
+
+<footer>
+<span>Last updated 2026-05-22 · 12-week quarter, 4 workstreams</span>
+<span>cells = ISO weeks · today line is dynamic</span>
+</footer>
+</div>
+
+<script>
+// 12 columns; bar positions are percent of full row width.
+const rows = [
+  {cat:'Activation', sub:'halve first-note drop-off', bars:[{cls:'act', start:0,  span:4, label:'Variants build'},
+                                                          {cls:'act', start:4,  span:4, label:'A/B run'},
+                                                          {cls:'act', start:8,  span:2, label:'Ship winner'}]},
+  {cat:'Reliability', sub:'p95 < 200ms · sliding window', bars:[{cls:'rel', start:0, span:3, label:'Spike + design'},
+                                                                 {cls:'rel', start:3, span:4, label:'Implement & test'},
+                                                                 {cls:'rel', start:7, span:1, label:'Roll out'}],
+   milestones:[{at:7, label:'Ship'}]},
+  {cat:'Mobile', sub:'offline-first via Yjs', bars:[{cls:'mob', start:1, span:5, label:'Web binding'},
+                                                    {cls:'mob', start:5, span:3, label:'RN binding'},
+                                                    {cls:'ghost', start:8, span:2, label:'slack'},
+                                                    {cls:'mob', start:8, span:2, label:'Beta'}]},
+  {cat:'Ops & Infra', sub:'Postgres 16, observability', bars:[{cls:'ops', start:1, span:3, label:'PG16 staging'},
+                                                              {cls:'ops', start:4, span:1, label:'Cutover'},
+                                                              {cls:'ops', start:5, span:6, label:'OTel coverage gaps'}]},
+];
+const tbody = document.getElementById('rows');
+rows.forEach(r=>{
+  const tr=document.createElement('tr');
+  const td=document.createElement('td'); td.className='lab'; td.style.borderRight='1px solid var(--rule)';
+  const t=document.createElement('div'); t.style.fontWeight='600'; t.textContent=r.cat; td.appendChild(t);
+  if(r.sub){const s=document.createElement('span'); s.className='sub'; s.textContent=r.sub; td.appendChild(s);}
+  tr.appendChild(td);
+
+  const bar=document.createElement('td'); bar.colSpan=12;
+  const wrap=document.createElement('div'); wrap.className='row-bar'; wrap.style.position='relative';
+  r.bars.forEach(b=>{
+    const el=document.createElement('div'); el.className='bar '+b.cls;
+    el.style.left=(b.start/12*100)+'%';
+    el.style.width=(b.span/12*100)+'%';
+    el.textContent=b.label;
+    el.title=b.label+' · weeks '+(27+b.start)+'–'+(27+b.start+b.span-1);
+    wrap.appendChild(el);
+  });
+  (r.milestones||[]).forEach(m=>{
+    const ms=document.createElement('div'); ms.className='milestone'; ms.style.left='calc('+(m.at/12*100)+'% - 8px)';
+    const lab=document.createElement('div'); lab.className='lab'; lab.textContent=m.label; ms.appendChild(lab);
+    wrap.appendChild(ms);
+  });
+  bar.appendChild(wrap); tr.appendChild(bar);
+  tbody.appendChild(tr);
+});
+
+// today line: pretend today is roughly week 30 of Q3 for the demo (adjust if you copy this template)
+const today=document.createElement('div'); today.className='today';
+today.style.left = ((4)/12*100)+'%';  // example position
+document.querySelector('.row-bar').parentElement.parentElement.appendChild(today);
+</script>
+</body>
+</html>

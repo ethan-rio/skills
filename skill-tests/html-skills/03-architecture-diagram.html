@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aurora — System Architecture</title>
+<style>
+:root{
+  --bg:#0b0f14; --panel:#111720; --rule:#1f2a37;
+  --ink:#e6edf3; --mute:#7d8a9a;
+  --edge:#3b82f6; --client:#22d3ee; --service:#a78bfa; --data:#f59e0b; --infra:#10b981;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:Inter,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55}
+.wrap{max-width:1240px;margin:0 auto;padding:30px 24px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;gap:16px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+h1{font-size:30px;margin:6px 0;font-weight:600;letter-spacing:-.01em}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mute);font-family:var(--mono)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.canvas{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:18px;overflow:auto}
+svg{display:block;min-width:1100px;width:100%;height:auto}
+.label{font:600 12px var(--sans);fill:var(--ink)}
+.sub{font:11px var(--mono);fill:var(--mute)}
+.boundary{fill:none;stroke:#2a3849;stroke-dasharray:4 4}
+.btitle{font:600 11px var(--mono);fill:var(--mute);letter-spacing:.1em;text-transform:uppercase}
+.notes{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:780px){.notes{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px}
+.card h3{margin:0 0 6px;font-size:13px;font-family:var(--mono);color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.card p{margin:0;font-size:13px}
+footer{margin-top:30px;color:var(--mute);font-size:12px;font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div>
+<div class="eyebrow">Architecture · Aurora platform · prod</div>
+<h1>System topology &amp; trust boundaries</h1>
+</div>
+<div class="legend">
+<span><span class="sw" style="background:#22d3ee"></span>Client</span>
+<span><span class="sw" style="background:#a78bfa"></span>Service</span>
+<span><span class="sw" style="background:#f59e0b"></span>Data store</span>
+<span><span class="sw" style="background:#10b981"></span>Infra</span>
+<span>—— sync</span>
+<span>· · · async / event</span>
+</div>
+</header>
+
+<div class="canvas">
+<svg viewBox="0 0 1180 640" role="img" aria-label="Aurora architecture">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6b7d"/>
+  </marker>
+  <marker id="arrEv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b"/>
+  </marker>
+</defs>
+
+<!-- public boundary -->
+<rect class="boundary" x="20" y="20" width="280" height="600" rx="8"/>
+<text class="btitle" x="34" y="44">Public · client zone</text>
+
+<!-- edge boundary -->
+<rect class="boundary" x="320" y="20" width="220" height="600" rx="8"/>
+<text class="btitle" x="334" y="44">Edge · CDN + WAF</text>
+
+<!-- service boundary -->
+<rect class="boundary" x="560" y="20" width="380" height="600" rx="8"/>
+<text class="btitle" x="574" y="44">VPC · services</text>
+
+<!-- data boundary -->
+<rect class="boundary" x="960" y="20" width="200" height="600" rx="8"/>
+<text class="btitle" x="974" y="44">Data tier</text>
+
+<!-- clients -->
+<g>
+  <rect x="50" y="80" width="220" height="60" rx="8" fill="#0e2530" stroke="#22d3ee"/>
+  <text class="label" x="70" y="108">Web app (Next.js)</text>
+  <text class="sub" x="70" y="126">~120k MAU</text>
+
+  <rect x="50" y="170" width="220" height="60" rx="8" fill="#0e2530" stroke="#22d3ee"/>
+  <text class="label" x="70" y="198">iOS / Android</text>
+  <text class="sub" x="70" y="216">React Native, ~28k DAU</text>
+
+  <rect x="50" y="260" width="220" height="60" rx="8" fill="#0e2530" stroke="#22d3ee"/>
+  <text class="label" x="70" y="288">Public API consumers</text>
+  <text class="sub" x="70" y="306">SDK, webhooks, partners</text>
+</g>
+
+<!-- edge -->
+<g>
+  <rect x="350" y="100" width="160" height="56" rx="8" fill="#1a2330" stroke="#10b981"/>
+  <text class="label" x="368" y="125">Cloudflare</text>
+  <text class="sub" x="368" y="142">CDN · WAF · DDoS</text>
+
+  <rect x="350" y="200" width="160" height="56" rx="8" fill="#1a2330" stroke="#10b981"/>
+  <text class="label" x="368" y="225">API gateway</text>
+  <text class="sub" x="368" y="242">authn · rate limit</text>
+</g>
+
+<!-- services -->
+<g>
+  <rect x="580" y="80" width="160" height="56" rx="8" fill="#1d1830" stroke="#a78bfa"/>
+  <text class="label" x="598" y="105">aurora-api</text>
+  <text class="sub" x="598" y="122">Go · 12 replicas</text>
+
+  <rect x="760" y="80" width="160" height="56" rx="8" fill="#1d1830" stroke="#a78bfa"/>
+  <text class="label" x="778" y="105">notes-svc</text>
+  <text class="sub" x="778" y="122">Go · CRDT sync</text>
+
+  <rect x="580" y="180" width="160" height="56" rx="8" fill="#1d1830" stroke="#a78bfa"/>
+  <text class="label" x="598" y="205">auth-svc</text>
+  <text class="sub" x="598" y="222">Rust · OAuth + JWT</text>
+
+  <rect x="760" y="180" width="160" height="56" rx="8" fill="#1d1830" stroke="#a78bfa"/>
+  <text class="label" x="778" y="205">search-svc</text>
+  <text class="sub" x="778" y="222">Python · embeddings</text>
+
+  <rect x="580" y="280" width="340" height="56" rx="8" fill="#1d1830" stroke="#a78bfa"/>
+  <text class="label" x="598" y="305">workers (BullMQ)</text>
+  <text class="sub" x="598" y="322">email · indexing · billing webhooks · digest</text>
+
+  <rect x="580" y="380" width="340" height="56" rx="8" fill="#152318" stroke="#10b981"/>
+  <text class="label" x="598" y="405">events bus (NATS JetStream)</text>
+  <text class="sub" x="598" y="422">at-least-once · 7-day retention</text>
+</g>
+
+<!-- data -->
+<g>
+  <rect x="980" y="80" width="160" height="56" rx="8" fill="#2a1f10" stroke="#f59e0b"/>
+  <text class="label" x="998" y="105">Postgres</text>
+  <text class="sub" x="998" y="122">primary · 2 replicas</text>
+
+  <rect x="980" y="170" width="160" height="56" rx="8" fill="#2a1f10" stroke="#f59e0b"/>
+  <text class="label" x="998" y="195">Redis</text>
+  <text class="sub" x="998" y="212">cache · rate-limit</text>
+
+  <rect x="980" y="260" width="160" height="56" rx="8" fill="#2a1f10" stroke="#f59e0b"/>
+  <text class="label" x="998" y="285">S3</text>
+  <text class="sub" x="998" y="302">attachments · backups</text>
+
+  <rect x="980" y="350" width="160" height="56" rx="8" fill="#2a1f10" stroke="#f59e0b"/>
+  <text class="label" x="998" y="375">Pinecone</text>
+  <text class="sub" x="998" y="392">vector index</text>
+</g>
+
+<!-- edges -->
+<g stroke="#5b6b7d" stroke-width="1.5" fill="none">
+  <path d="M270,110 L350,128" marker-end="url(#arr)"/>
+  <path d="M270,200 L350,128" marker-end="url(#arr)"/>
+  <path d="M270,290 L350,228" marker-end="url(#arr)"/>
+  <path d="M510,128 L580,108" marker-end="url(#arr)"/>
+  <path d="M510,228 L580,208" marker-end="url(#arr)"/>
+  <path d="M740,108 L760,108" marker-end="url(#arr)"/>
+  <path d="M660,136 L660,180" marker-end="url(#arr)"/>
+  <path d="M840,136 L840,180" marker-end="url(#arr)"/>
+  <path d="M740,208 L760,208" marker-end="url(#arr)"/>
+  <path d="M920,108 L980,108" marker-end="url(#arr)"/>
+  <path d="M920,208 L980,198" marker-end="url(#arr)"/>
+  <path d="M920,208 L980,288" marker-end="url(#arr)"/>
+  <path d="M920,208 L980,378" marker-end="url(#arr)"/>
+  <path d="M920,108 L980,178" marker-end="url(#arr)"/>
+</g>
+
+<!-- async -->
+<g stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4" fill="none">
+  <path d="M660,236 L660,380" marker-end="url(#arrEv)"/>
+  <path d="M840,236 L840,380" marker-end="url(#arrEv)"/>
+  <path d="M750,408 L750,336" marker-end="url(#arrEv)"/>
+</g>
+
+<!-- callouts -->
+<g>
+  <text class="sub" x="310" y="450">— hot path requests</text>
+  <text class="sub" x="310" y="470" fill="#f59e0b">· · · async events</text>
+  <text class="sub" x="50" y="540">scale · ~3.4k req/s peak · p95 198ms</text>
+  <text class="sub" x="50" y="560">deploy · GitHub Actions → ArgoCD → EKS</text>
+  <text class="sub" x="50" y="580">obs · OTel → Tempo / Loki / Grafana</text>
+</g>
+</svg>
+</div>
+
+<div class="notes">
+<div class="card"><h3>Trust boundaries</h3><p>Three: client → edge (TLS termination), edge → VPC (mTLS via gateway), VPC → data tier (private subnets, IAM auth).</p></div>
+<div class="card"><h3>Hot path</h3><p>Web → Cloudflare → API gateway → aurora-api → Postgres. 80% of read traffic served from Redis cache layer in front of Postgres reads.</p></div>
+<div class="card"><h3>Failure isolation</h3><p>workers and events bus are async; outages there don't block the hot path. notes-svc has its own pool — CRDT spikes don't starve auth.</p></div>
+</div>
+
+<footer>Last updated 2026-05-21 · arch-board approved · review quarterly</footer>
+</div>
+</body>
+</html>

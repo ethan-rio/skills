@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>html-skills · 16 demos</title>
+<style>
+:root{
+  --paper:#f6f3ec; --ink:#16140f; --rule:#1f1c14; --mute:#5e5848; --accent:#c2410c; --accent2:#0e7490;
+  --serif:'Iowan Old Style','Georgia',serif; --sans:Inter,system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding:48px 24px 80px}
+header{border-bottom:2px solid var(--rule);padding-bottom:18px;margin-bottom:32px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:54px;line-height:1;margin:8px 0 6px;font-weight:700;letter-spacing:-.02em}
+.dek{color:var(--mute);font-style:italic;max-width:62ch}
+.meta{font-family:var(--mono);font-size:11px;color:var(--mute);margin-top:14px;display:flex;gap:14px;flex-wrap:wrap}
+.meta .tag{padding:3px 8px;border:1px solid var(--rule);border-radius:99px}
+section h2{font-family:var(--sans);font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:30px 0 12px;border-top:1px solid var(--rule);padding-top:20px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.card{display:block;background:#fffaef;border:1px solid var(--rule);border-radius:6px;padding:14px 16px;text-decoration:none;color:inherit;transition:transform .15s, box-shadow .15s;position:relative}
+.card:hover{transform:translateY(-2px);box-shadow:3px 3px 0 var(--rule)}
+.card .num{position:absolute;top:10px;right:14px;font-family:var(--mono);font-size:11px;color:var(--mute)}
+.card h3{margin:0 0 4px;font-size:18px;font-family:var(--sans);font-weight:700;letter-spacing:-.005em;padding-right:34px}
+.card .skill{font-family:var(--mono);font-size:11px;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px}
+.card p{margin:0;color:var(--mute);font-size:14px}
+.card .tag{display:inline-block;font-family:var(--mono);font-size:10.5px;color:var(--mute);border:1px solid var(--rule);border-radius:99px;padding:1px 6px;margin-top:8px;margin-right:4px}
+.card .tag.int{color:var(--accent);border-color:var(--accent)}
+.foot{margin-top:48px;color:var(--mute);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--rule);padding-top:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+<div class="eyebrow">html-skills · self-test gallery</div>
+<h1>Sixteen demos, one per skill.</h1>
+<p class="dek">A working artifact for every content skill from <code>f-labs-io/agent-html-skills</code>. Each one shows what its skill is uniquely good at — varied topics, deliberately different aesthetics, no purple gradients.</p>
+<div class="meta">
+<span class="tag">16 / 16 skills</span>
+<span class="tag">interactive</span>
+<span class="tag">Submit→Claude</span>
+<span class="tag">generated 2026-05-22</span>
+</div>
+</header>
+
+<section>
+<h2>Specs &amp; planning</h2>
+<div class="grid">
+<a class="card" href="01-spec-planning-offline-sync.html">
+  <span class="num">01</span>
+  <span class="skill">html-spec-planning</span>
+  <h3>Offline sync · spec</h3>
+  <p>Three-approach exploration → recommendation, SVG data flow, file-by-file implementation plan, open questions.</p>
+  <span class="tag">paper aesthetic</span>
+</a>
+<a class="card" href="02-code-review-pr.html">
+  <span class="num">02</span>
+  <span class="skill">html-code-review</span>
+  <h3>PR #4127 · annotated diff</h3>
+  <p>Real diff with margin annotations, severity tags, jump-to-finding nav, criticality classification.</p>
+  <span class="tag">github dark</span>
+</a>
+<a class="card" href="03-architecture-diagram.html">
+  <span class="num">03</span>
+  <span class="skill">html-architecture-diagrams</span>
+  <h3>Aurora · system topology</h3>
+  <p>Trust boundaries, sync vs async edges, hot-path callouts. Pure inline SVG.</p>
+  <span class="tag">dark technical</span>
+</a>
+</div>
+</section>
+
+<section>
+<h2>Exploration &amp; comparison</h2>
+<div class="grid">
+<a class="card" href="04-brainstorm-grid.html">
+  <span class="num">04</span>
+  <span class="skill">html-brainstorm-grid</span>
+  <h3>Naming the AI tool · 6 angles</h3>
+  <p>Six distinct directions × ~5 candidates each. Star favorites, submit picks back.</p>
+  <span class="tag">editorial</span><span class="tag int">interactive</span>
+</a>
+<a class="card" href="05-comparison-matrix.html">
+  <span class="num">05</span>
+  <span class="skill">html-comparison-matrix</span>
+  <h3>Vector DB · weighted matrix</h3>
+  <p>Drag weights; scores update live; recommendation auto-switches. Submit captures full state.</p>
+  <span class="tag">dark</span><span class="tag int">interactive</span>
+</a>
+<a class="card" href="06-data-explorer.html">
+  <span class="num">06</span>
+  <span class="skill">html-data-explorer</span>
+  <h3>Recent deployments</h3>
+  <p>58-row faceted table: free-text search, status/env chip filters, sortable columns, summary aggregates.</p>
+  <span class="tag">dark</span>
+</a>
+</div>
+</section>
+
+<section>
+<h2>Design</h2>
+<div class="grid">
+<a class="card" href="07-design-prototypes.html">
+  <span class="num">07</span>
+  <span class="skill">html-design-prototypes</span>
+  <h3>Pay button · animation tuner</h3>
+  <p>Sliders for duration, easing, color. Live preview, code panel, "submit params" → wire into the real component.</p>
+  <span class="tag">light minimal</span><span class="tag int">interactive</span>
+</a>
+<a class="card" href="08-design-tokens.html">
+  <span class="num">08</span>
+  <span class="skill">html-design-tokens</span>
+  <h3>Aurora tokens</h3>
+  <p>Color, type, spacing, radii, shadows. Click any swatch to copy the var name.</p>
+  <span class="tag">editorial</span>
+</a>
+</div>
+</section>
+
+<section>
+<h2>Diagrams &amp; data shapes</h2>
+<div class="grid">
+<a class="card" href="09-erd-explorer.html">
+  <span class="num">09</span>
+  <span class="skill">html-erd-explorer</span>
+  <h3>Aurora · ERD</h3>
+  <p>Six tables, FK lines, PK/UQ markers, "many" / "one" line endings. Detail cards under the diagram.</p>
+  <span class="tag">paper schematic</span>
+</a>
+<a class="card" href="14-svg-diagrams.html">
+  <span class="num">14</span>
+  <span class="skill">html-svg-diagrams</span>
+  <h3>Pipeline · figure sheet</h3>
+  <p>Three SVG figures (build, runtime, failure tree). Uses <code>&lt;foreignObject&gt;</code> so labels wrap properly.</p>
+  <span class="tag">editorial</span>
+</a>
+<a class="card" href="11-mind-map.html">
+  <span class="num">11</span>
+  <span class="skill">html-mind-map</span>
+  <h3>Conversion drop · hypothesis tree</h3>
+  <p>Draggable debug map: hypotheses, supporting/refuting evidence, tests. Live indented-outline export.</p>
+  <span class="tag">paper analog</span><span class="tag int">interactive</span>
+</a>
+</div>
+</section>
+
+<section>
+<h2>Communication</h2>
+<div class="grid">
+<a class="card" href="12-research-report.html">
+  <span class="num">12</span>
+  <span class="skill">html-research-reports</span>
+  <h3>Rate limiter explainer</h3>
+  <p>TL;DR, SVG flow, tabbed code (Lua / Go / yaml), collapsible walkthrough, FAQ &amp; glossary.</p>
+  <span class="tag">long-form editorial</span>
+</a>
+<a class="card" href="13-slideshow-deck.html">
+  <span class="num">13</span>
+  <span class="skill">html-slideshow-deck</span>
+  <h3>Q3 kickoff · 8 slides</h3>
+  <p>Arrow keys / space to navigate. Print-friendly. Big stats, three-column bets, what's <em>not</em> in scope.</p>
+  <span class="tag">editorial dark</span>
+</a>
+</div>
+</section>
+
+<section>
+<h2>Throwaway editors &amp; tuners</h2>
+<div class="grid">
+<a class="card" href="10-interactive-playground.html">
+  <span class="num">10</span>
+  <span class="skill">html-interactive-playground</span>
+  <h3>Token-bucket simulator</h3>
+  <p>Tune capacity / refill / traffic. Bucket and timeline animate. Submit params back when satisfied.</p>
+  <span class="tag">dark</span><span class="tag int">interactive</span>
+</a>
+<a class="card" href="15-throwaway-editor.html">
+  <span class="num">15</span>
+  <span class="skill">html-throwaway-editor</span>
+  <h3>Linear triage board</h3>
+  <p>30 tickets across Now / Next / Later / Cut. Native HTML5 drag-and-drop. Export as markdown or submit.</p>
+  <span class="tag">light</span><span class="tag int">interactive</span>
+</a>
+<a class="card" href="16-timeline-roadmap.html">
+  <span class="num">16</span>
+  <span class="skill">html-timeline-roadmap</span>
+  <h3>Q3 · gantt roadmap</h3>
+  <p>4 workstreams × 12 weeks. Milestones, today line, "ghost work" / slack bars, risk cards underneath.</p>
+  <span class="tag">dark</span>
+</a>
+</div>
+</section>
+
+<div class="foot">
+<span>16 / 16 skills demonstrated · 4 of them interactive (Submit→Claude wired)</span>
+<span>plugin: f-labs-io/agent-html-skills · MIT</span>
+</div>
+
+</div>
+</body>
+</html>

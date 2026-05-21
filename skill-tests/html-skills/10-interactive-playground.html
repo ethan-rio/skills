@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Token-bucket rate limiter — playground</title>
+<style>
+:root{
+  --bg:#0a0d12; --panel:#10151c; --rule:#222a36; --ink:#dee5ef; --mute:#7d8a9a;
+  --tok:#fbbf24; --req-ok:#3fb950; --req-no:#f85149; --grid:#1a2230;
+  --mono:ui-monospace,Menlo,monospace; --sans:Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:30px 22px 60px;display:grid;grid-template-columns:1fr 320px;gap:22px}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+header{grid-column:1/-1}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+h1{font-size:26px;margin:6px 0;font-weight:600}
+.dek{color:var(--mute);max-width:64ch}
+.stage{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:22px}
+.bucket{display:flex;gap:6px;align-items:flex-end;height:60px;margin:14px 0;padding:8px;background:#0a0e14;border:1px dashed var(--rule);border-radius:8px}
+.tok{width:18px;height:36px;background:var(--tok);border-radius:3px}
+.bucket .empty{width:18px;height:36px;background:transparent;border:1px dashed #2a3849;border-radius:3px}
+.row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--mute);margin-bottom:6px}
+.timeline{height:120px;background:#0a0e14;border:1px solid var(--rule);border-radius:8px;position:relative;overflow:hidden}
+.timeline .grid{position:absolute;inset:0;background-image:linear-gradient(to right,var(--grid) 1px,transparent 1px);background-size:10% 100%}
+.timeline .req{position:absolute;bottom:0;width:6px;border-radius:3px 3px 0 0;animation:rise .5s ease forwards}
+@keyframes rise{from{height:0}to{}}
+.timeline .req.ok{background:var(--req-ok);height:100%}
+.timeline .req.no{background:var(--req-no);height:60%}
+.legend{display:flex;gap:14px;font-family:var(--mono);font-size:11px;color:var(--mute);margin-top:8px}
+.legend .ok::before,.legend .no::before,.legend .tok::before{content:'';display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.legend .ok::before{background:var(--req-ok)} .legend .no::before{background:var(--req-no)} .legend .tok::before{background:var(--tok)}
+.controls{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:18px;height:max-content}
+.controls h2{margin:0 0 12px;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.field{margin-bottom:14px}
+.field label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin-bottom:6px}
+.field .v{color:var(--tok);font-weight:600}
+.field input[type=range]{width:100%}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font-family:var(--mono);font-size:12px;padding:8px 12px;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:6px;cursor:pointer}
+button.primary{background:var(--tok);color:#0a0d12;border-color:var(--tok);font-weight:600}
+.stats{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-family:var(--mono);font-size:11px}
+.stat{background:#0a0e14;border:1px solid var(--rule);border-radius:6px;padding:8px;text-align:center}
+.stat b{display:block;font-size:18px;color:var(--ink);margin-bottom:2px}
+footer{grid-column:1/-1;color:var(--mute);font-family:var(--mono);font-size:11px;border-top:1px solid var(--rule);padding-top:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="eyebrow">Playground · token-bucket rate limiter</div>
+<h1>Tune capacity, refill rate, and burst</h1>
+<p class="dek">Fire requests manually or auto. Watch the bucket fill and drain in real time. When the bucket is empty, requests are rejected (red). Find params that pass realistic traffic without letting bursts through.</p>
+</header>
+
+<div class="stage">
+<div class="row"><span>Bucket · <span id="cur">0</span> / <span id="cap">10</span></span><span>refill <span id="rrl">2</span> tok/s</span></div>
+<div class="bucket" id="bucket"></div>
+<div class="row"><span>Timeline · last 10s of requests</span><span><span id="okC">0</span> ok · <span id="noC">0</span> rejected</span></div>
+<div class="timeline" id="tl"><div class="grid"></div></div>
+<div class="legend"><span class="tok">token</span><span class="ok">accepted</span><span class="no">rejected</span></div>
+</div>
+
+<aside class="controls">
+<h2>Parameters</h2>
+<div class="field"><label>Capacity <span class="v" id="capV">10</span></label><input type="range" id="cap_in" min="1" max="40" value="10"/></div>
+<div class="field"><label>Refill rate (tok/s) <span class="v" id="rrV">2</span></label><input type="range" id="rr_in" min="0.5" max="20" step="0.5" value="2"/></div>
+<div class="field"><label>Auto traffic (req/s) <span class="v" id="trV">0</span></label><input type="range" id="tr_in" min="0" max="20" step="0.5" value="0"/></div>
+<div class="btns">
+<button id="fire">Fire 1 req</button>
+<button id="burst">Burst (×10)</button>
+<button id="reset">Reset</button>
+<button id="submit" class="primary">Submit params →</button>
+</div>
+<div class="stats">
+<div class="stat"><b id="t_total">0</b>requests</div>
+<div class="stat"><b id="t_pass">0%</b>pass rate</div>
+<div class="stat"><b id="t_q">0</b>queue depth</div>
+</div>
+</aside>
+
+<footer>
+<span>Last updated 2026-05-21 · simulator only — not a real limiter</span>
+<span>params copy/post on Submit; paste back into Claude to wire into limiter.go</span>
+</footer>
+</div>
+
+<script src="./_submit-handler.js"></script>
+<script>
+let cap = 10, rate = 2, traffic = 0;
+let tokens = cap; let total=0, pass=0;
+const events=[]; // {t, ok}
+
+function refresh(){
+  document.getElementById('cap').textContent=cap;
+  document.getElementById('rrl').textContent=rate;
+  const b=document.getElementById('bucket'); b.textContent='';
+  for(let i=0;i<cap;i++){
+    const d=document.createElement('div'); d.className = i<Math.floor(tokens) ? 'tok' : 'empty';
+    if(i===Math.floor(tokens) && tokens%1>0){ d.className='tok'; d.style.height = (36*(tokens%1))+'px'; }
+    b.appendChild(d);
+  }
+  document.getElementById('cur').textContent=tokens.toFixed(1);
+  document.getElementById('t_total').textContent=total;
+  document.getElementById('t_pass').textContent = total? Math.round(100*pass/total)+'%' : '–';
+  document.getElementById('t_q').textContent = Math.max(0, Math.ceil(events.filter(e=>!e.ok && Date.now()-e.t<2000).length));
+  document.getElementById('okC').textContent = pass;
+  document.getElementById('noC').textContent = total-pass;
+}
+
+function paint(){
+  const tl=document.getElementById('tl');
+  // remove old children except grid
+  Array.from(tl.children).forEach(c=>{ if(c.className!=='grid') c.remove(); });
+  const now=Date.now();
+  const W=tl.getBoundingClientRect().width;
+  events.forEach(e=>{
+    const age=(now-e.t)/10000; if(age>1)return;
+    const d=document.createElement('div'); d.className='req '+(e.ok?'ok':'no');
+    d.style.left = (W*(1-age)-3)+'px';
+    tl.appendChild(d);
+  });
+}
+
+function fire(){
+  total++;
+  if(tokens>=1){ tokens-=1; pass++; events.push({t:Date.now(), ok:true}); }
+  else events.push({t:Date.now(), ok:false});
+  while(events.length>500) events.shift();
+  refresh();
+}
+
+let last=Date.now();
+setInterval(()=>{
+  const now=Date.now(); const dt=(now-last)/1000; last=now;
+  tokens = Math.min(cap, tokens + rate*dt);
+  // auto traffic: probabilistic
+  if(traffic>0){
+    const expected = traffic*dt;
+    let n = Math.floor(expected);
+    if(Math.random()<expected-n) n++;
+    for(let i=0;i<n;i++) fire();
+  }
+  paint(); refresh();
+},120);
+
+const wire=(id, fn)=> document.getElementById(id).addEventListener('input',e=>{ fn(+e.target.value); });
+wire('cap_in', v=>{ cap=v; tokens=Math.min(tokens,cap); document.getElementById('capV').textContent=v; });
+wire('rr_in',  v=>{ rate=v; document.getElementById('rrV').textContent=v; });
+wire('tr_in',  v=>{ traffic=v; document.getElementById('trV').textContent=v; });
+
+document.getElementById('fire').onclick = ()=>fire();
+document.getElementById('burst').onclick = ()=>{ for(let i=0;i<10;i++) fire(); };
+document.getElementById('reset').onclick = ()=>{ tokens=cap; total=0; pass=0; events.length=0; refresh(); paint(); };
+
+document.getElementById('submit').onclick = async ()=>{
+  await submitToClaude({
+    skill:'html-interactive-playground', kind:'tokenbucket-params',
+    data:{ capacity:cap, refill_per_sec:rate, auto_traffic_per_sec:traffic, observed_pass_rate: total?pass/total:null, sample_size: total },
+    version:1
+  });
+};
+refresh();
+</script>
+</body>
+</html>

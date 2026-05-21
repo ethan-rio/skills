@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Brainstorm — Names for the AI tool</title>
+<style>
+:root{
+  --bg:#fafaf7; --ink:#1a1a1a; --rule:#dcd6c8;
+  --c1:#c2410c; --c2:#0e7490; --c3:#7c3aed; --c4:#15803d; --c5:#b91c1c; --c6:#1d4ed8;
+  --mute:#6b6b6b;
+  --serif:Georgia, 'Times New Roman', serif;
+  --mono:ui-monospace, Menlo, Consolas, monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:16px;line-height:1.5}
+.wrap{max-width:1320px;margin:0 auto;padding:36px 22px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:14px;margin-bottom:24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+h1{margin:4px 0;font-size:32px;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--mute);font-style:italic;max-width:62ch}
+.toolbar{display:flex;gap:8px;font-family:var(--mono);font-size:12px;align-items:center;flex-wrap:wrap}
+button{font:inherit;font-family:var(--mono);font-size:12px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);padding:8px 12px;border-radius:4px;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:680px){.grid{grid-template-columns:1fr}}
+.col{border-top:3px solid var(--ink);padding-top:10px}
+.col h2{margin:0 0 10px;font-size:16px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.col[data-c="1"]{border-color:var(--c1)} .col[data-c="1"] h2{color:var(--c1)}
+.col[data-c="2"]{border-color:var(--c2)} .col[data-c="2"] h2{color:var(--c2)}
+.col[data-c="3"]{border-color:var(--c3)} .col[data-c="3"] h2{color:var(--c3)}
+.col[data-c="4"]{border-color:var(--c4)} .col[data-c="4"] h2{color:var(--c4)}
+.col[data-c="5"]{border-color:var(--c5)} .col[data-c="5"] h2{color:var(--c5)}
+.col[data-c="6"]{border-color:var(--c6)} .col[data-c="6"] h2{color:var(--c6)}
+.col p.angle{margin:0 0 12px;font-size:13px;color:var(--mute);font-style:italic}
+.card{background:#fff;border:1px solid var(--rule);padding:10px 12px;margin-bottom:10px;cursor:pointer;border-radius:4px;display:flex;align-items:flex-start;gap:8px}
+.card.fav{border-color:var(--ink);background:#fff7d6}
+.card .name{font-size:18px;font-weight:700;flex:1}
+.card .why{font-size:12px;color:var(--mute);font-style:italic;margin-top:3px}
+.star{font-family:var(--mono);font-size:14px;width:18px;text-align:center;color:var(--mute);user-select:none}
+.card.fav .star{color:var(--c1)}
+.summary{margin-top:30px;background:#fff;border:1px solid var(--rule);padding:18px;border-radius:6px}
+.summary h3{margin:0 0 8px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.summary ol{margin:0;padding-left:22px}
+footer{margin-top:30px;color:var(--mute);font-size:12px;font-family:var(--mono);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--rule);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div>
+<div class="eyebrow">Brainstorm grid · 6 directions × ~5 candidates</div>
+<h1>Names for the new internal AI tool</h1>
+<p class="sub">Six distinct angles laid out side-by-side so the team can star favorites and submit the picks back. Click any card to favorite; click again to unfavorite.</p>
+</div>
+<div class="toolbar">
+<button class="ghost" id="clear">Clear stars</button>
+<button id="submit">Submit favorites →</button>
+</div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="summary">
+<h3>Currently starred</h3>
+<ol id="favs"><li style="font-style:italic;color:var(--mute)">none yet</li></ol>
+</div>
+
+<footer>
+<span>Submit copies/sends a JSON envelope · grid generated 2026-05-21</span>
+<span>arrow keys: tab through · space: toggle</span>
+</footer>
+</div>
+
+<script src="./_submit-handler.js"></script>
+<script>
+const data = [
+  {c:1, h:'Literal & functional', angle:'Says what it does. Boring is sometimes correct.',
+    items:[{n:'Atlas', w:'a thing you consult'}, {n:'Tabby', w:'tab-completion vibe'}, {n:'Compass', w:'directional, calm'}, {n:'Index', w:'developer-honest'}, {n:'Mentor', w:'role over name'}]},
+  {c:2, h:'Evocative & poetic', angle:'A small mood. Slightly opaque.',
+    items:[{n:'Glimpse', w:'a flash of insight'}, {n:'Murmur', w:'always-on, low'}, {n:'Ember', w:'warm, slow burn'}, {n:'Cipher', w:'decoded thinking'}, {n:'Halcyon', w:'calm productivity'}]},
+  {c:3, h:'Playful & weird', angle:'Memorable; a little dumb on purpose.',
+    items:[{n:'Squawk', w:'birdy, agentic'}, {n:'Kelpie', w:'shape-shifting helper'}, {n:'Burrow', w:'goes deep'}, {n:'Yolk', w:'core thing'}, {n:'Pith', w:'the gist of it'}]},
+  {c:4, h:'Mythic & elemental', angle:'Big-feeling. Easy to over-claim — pick wisely.',
+    items:[{n:'Hermes', w:'messenger god'}, {n:'Argus', w:'many-eyed watcher'}, {n:'Briar', w:'tangled but useful'}, {n:'Talos', w:'guardian automaton'}, {n:'Mneme', w:'memory muse'}]},
+  {c:5, h:'Animal kingdom', angle:'Concrete, easy to draw, easy to say.',
+    items:[{n:'Magpie', w:'collects shiny things'}, {n:'Otter', w:'tool-using'}, {n:'Heron', w:'patient, focused'}, {n:'Marmot', w:'hibernates between bursts'}, {n:'Coyote', w:'clever, cheeky'}]},
+  {c:6, h:'Verb-as-name', angle:'Feels like an action. Reads in a sentence.',
+    items:[{n:'Sift', w:'"can you sift this?"'}, {n:'Reckon', w:'thinks-it-through'}, {n:'Parse', w:'developer pun'}, {n:'Limn', w:'to outline subtly'}, {n:'Forge', w:'shapes things'}]}
+];
+
+const fav = new Set();
+const grid = document.getElementById('grid');
+data.forEach(col=>{
+  const c = document.createElement('div');
+  c.className='col'; c.dataset.c=col.c;
+  const h = document.createElement('h2'); h.textContent = col.h; c.appendChild(h);
+  const p = document.createElement('p'); p.className='angle'; p.textContent = col.angle; c.appendChild(p);
+  col.items.forEach(it=>{
+    const card=document.createElement('div'); card.className='card'; card.tabIndex=0;
+    card.dataset.col=col.h; card.dataset.name=it.n;
+    const star=document.createElement('div'); star.className='star'; star.textContent='☆';
+    const body=document.createElement('div'); body.style.flex='1';
+    const name=document.createElement('div'); name.className='name'; name.textContent=it.n;
+    const why=document.createElement('div'); why.className='why'; why.textContent=it.w;
+    body.append(name,why);
+    card.append(star,body);
+    const tog=()=>{
+      const k=col.h+'/'+it.n;
+      if(fav.has(k)){ fav.delete(k); card.classList.remove('fav'); star.textContent='☆'; }
+      else { fav.add(k); card.classList.add('fav'); star.textContent='★'; }
+      render();
+    };
+    card.addEventListener('click', tog);
+    card.addEventListener('keydown', e=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); tog(); }});
+    c.appendChild(card);
+  });
+  grid.appendChild(c);
+});
+
+function render(){
+  const ul=document.getElementById('favs'); ul.textContent='';
+  if(fav.size===0){ const li=document.createElement('li'); li.style.fontStyle='italic'; li.style.color='var(--mute)'; li.textContent='none yet'; ul.appendChild(li); return; }
+  [...fav].forEach(k=>{
+    const [col,name]=k.split('/');
+    const li=document.createElement('li');
+    const b=document.createElement('b'); b.textContent=name;
+    const sm=document.createElement('span'); sm.style.color='var(--mute)'; sm.textContent=' — '+col;
+    li.append(b,sm); ul.appendChild(li);
+  });
+}
+
+document.getElementById('clear').addEventListener('click', ()=>{
+  fav.clear();
+  document.querySelectorAll('.card.fav').forEach(c=>{c.classList.remove('fav'); c.querySelector('.star').textContent='☆'});
+  render();
+});
+
+document.getElementById('submit').addEventListener('click', async ()=>{
+  await submitToClaude({
+    skill:'html-brainstorm-grid', kind:'brainstorm-favorites',
+    data:{ topic:'naming the AI tool', favorites:[...fav].map(k=>{const [col,name]=k.split('/');return{col,name}}) },
+    version:1
+  });
+});
+</script>
+</body>
+</html>

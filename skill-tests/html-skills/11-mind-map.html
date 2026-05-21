@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Why are checkout conversions down? — debug map</title>
+<style>
+:root{
+  --paper:#f7f3ec; --ink:#1c1a16; --rule:#2b2a25; --mute:#6f6a5e;
+  --hyp:#0e7490; --evp:#15803d; --evn:#b91c1c; --test:#a16207;
+  --mono:'JetBrains Mono', ui-monospace, monospace; --serif:Georgia, serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:14px;line-height:1.5}
+.wrap{max-width:1320px;margin:0 auto;padding:24px 18px 40px}
+header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:14px;margin-bottom:18px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+h1{font-size:26px;margin:6px 0;font-weight:700;letter-spacing:-.01em}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:11px}
+button{font:inherit;font-family:var(--mono);font-size:11px;padding:7px 11px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);border-radius:4px;cursor:pointer}
+button.primary{background:var(--ink);color:var(--paper)}
+.legend{display:flex;gap:14px;font-family:var(--mono);font-size:11px;color:var(--mute);margin-bottom:12px;flex-wrap:wrap}
+.legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:99px;margin-right:5px;vertical-align:middle}
+.lh::before{background:var(--hyp)} .le::before{background:var(--evp)} .lr::before{background:var(--evn)} .lt::before{background:var(--test)}
+.canvas{position:relative;width:100%;height:680px;background:#fcfaf3;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.canvas svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.node{position:absolute;background:#fff;border:1.5px solid var(--ink);border-radius:8px;padding:8px 10px;cursor:grab;font-size:13px;box-shadow:2px 2px 0 var(--ink);user-select:none;max-width:220px;min-width:120px}
+.node.root{background:#fff7d6;font-weight:700;font-family:var(--serif);font-size:15px}
+.node.hyp{border-color:var(--hyp);background:#ecfeff}
+.node.ev_p{border-color:var(--evp);background:#f0fdf4;font-size:12px}
+.node.ev_n{border-color:var(--evn);background:#fef2f2;font-size:12px;text-decoration:line-through;text-decoration-color:rgba(0,0,0,.3)}
+.node.test{border-color:var(--test);background:#fefce8;font-size:12px;font-style:italic}
+.node:active{cursor:grabbing}
+.node .badge{font-family:var(--mono);font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:2px}
+.export{margin-top:18px;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:14px}
+.export h3{margin:0 0 8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+pre{margin:0;font-family:var(--mono);font-size:12px;white-space:pre-wrap;color:var(--ink)}
+footer{margin-top:24px;color:var(--mute);font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--rule);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div>
+<div class="eyebrow">Hypothesis tree · debug session · 2026-05-21</div>
+<h1>Why did checkout conversion drop 18% Tuesday?</h1>
+</div>
+<div class="toolbar">
+<button id="exportBtn">Export outline</button>
+<button id="submit" class="primary">Submit map →</button>
+</div>
+</header>
+
+<div class="legend">
+<span class="lh">hypothesis</span>
+<span class="le">supporting evidence</span>
+<span class="lr">refuted (kept for record)</span>
+<span class="lt">test to run</span>
+<span style="margin-left:auto">drag any node to reposition</span>
+</div>
+
+<div class="canvas" id="canvas">
+<svg id="links"></svg>
+</div>
+
+<div class="export">
+<h3>Outline (live)</h3>
+<pre id="outline"></pre>
+</div>
+
+<footer>
+<span>Last updated 2026-05-21 · drag to reposition · indented outline auto-syncs</span>
+<span>Submit posts the tree as JSON — paste back to continue investigation</span>
+</footer>
+</div>
+
+<script src="./_submit-handler.js"></script>
+<script>
+const tree = {
+  id:'r', kind:'root', label:'Checkout conversion ↓18% on Tue', x:480, y:30, children:[
+    {id:'h1', kind:'hyp', label:'iOS Safari bug', x:120, y:180, children:[
+      {id:'e1', kind:'ev_p', label:'iOS share % of fails ↑ 3.2× vs baseline', x:30,  y:330},
+      {id:'e2', kind:'ev_p', label:'Sentry: SecurityError on Apple Pay sheet', x:30, y:380},
+      {id:'t1', kind:'test', label:'roll back PR #4119 (Pay sheet rewrite)', x:30, y:430}
+    ]},
+    {id:'h2', kind:'hyp', label:'Stripe outage', x:380, y:180, children:[
+      {id:'e3', kind:'ev_n', label:'Stripe status page green all day', x:300, y:330},
+      {id:'e4', kind:'ev_n', label:'webhook latency normal in our logs', x:300, y:380}
+    ]},
+    {id:'h3', kind:'hyp', label:'Deploy of pricing display', x:640, y:180, children:[
+      {id:'e5', kind:'ev_p', label:'deploy-aurora-web went out at 11:02 UTC', x:560, y:330},
+      {id:'t2', kind:'test', label:'A/B revert pricing card → measure 2h', x:560, y:380}
+    ]},
+    {id:'h4', kind:'hyp', label:'Marketing campaign mis-targeted', x:900, y:180, children:[
+      {id:'e6', kind:'ev_p', label:'Google Ads CPC spiked, low intent', x:840, y:330},
+      {id:'e7', kind:'ev_n', label:'organic conversion same dropped', x:840, y:380}
+    ]}
+  ]
+};
+
+const canvas = document.getElementById('canvas');
+const svg = document.getElementById('links');
+const nodesById = new Map();
+
+function flatten(n, parent=null){
+  nodesById.set(n.id, {n, parent});
+  (n.children||[]).forEach(c=>flatten(c,n));
+}
+flatten(tree);
+
+function renderNodes(){
+  document.querySelectorAll('.node').forEach(n=>n.remove());
+  nodesById.forEach(({n})=>{
+    const el=document.createElement('div'); el.className='node '+n.kind; el.dataset.id=n.id;
+    const b=document.createElement('span'); b.className='badge'; b.textContent=n.kind.replace('_',' '); el.appendChild(b);
+    const t=document.createElement('div'); t.textContent=n.label; el.appendChild(t);
+    el.style.left=n.x+'px'; el.style.top=n.y+'px';
+    canvas.appendChild(el);
+    drag(el,n);
+  });
+  drawLinks(); writeOutline();
+}
+function drawLinks(){
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  nodesById.forEach(({n,parent})=>{
+    if(!parent) return;
+    const a=document.querySelector(`[data-id="${parent.id}"]`);
+    const b=document.querySelector(`[data-id="${n.id}"]`);
+    if(!a||!b) return;
+    const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect(), cr=canvas.getBoundingClientRect();
+    const ax=ar.left-cr.left+ar.width/2, ay=ar.top-cr.top+ar.height;
+    const bx=br.left-cr.left+br.width/2, by=br.top-cr.top;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    const dy=(by-ay)/2;
+    path.setAttribute('d',`M ${ax} ${ay} C ${ax} ${ay+dy}, ${bx} ${by-dy}, ${bx} ${by}`);
+    path.setAttribute('stroke','#1c1a16'); path.setAttribute('fill','none'); path.setAttribute('stroke-width','1.4');
+    if(n.kind==='ev_n') path.setAttribute('stroke-dasharray','4 3');
+    svg.appendChild(path);
+  });
+}
+function drag(el,n){
+  let sx=0,sy=0,nx=0,ny=0;
+  el.addEventListener('mousedown', e=>{
+    e.preventDefault(); sx=e.clientX; sy=e.clientY; nx=n.x; ny=n.y;
+    const move=ev=>{ n.x=nx+(ev.clientX-sx); n.y=ny+(ev.clientY-sy); el.style.left=n.x+'px'; el.style.top=n.y+'px'; drawLinks(); };
+    const up=()=>{ window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); writeOutline(); };
+    window.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+  });
+}
+function writeOutline(){
+  const lines=[];
+  function rec(n, d=0){
+    const sym = n.kind==='ev_p'?'+':n.kind==='ev_n'?'×':n.kind==='test'?'?':'-';
+    lines.push('  '.repeat(d)+sym+' '+n.label);
+    (n.children||[]).forEach(c=>rec(c,d+1));
+  }
+  rec(tree);
+  document.getElementById('outline').textContent = lines.join('\n');
+}
+window.addEventListener('resize', drawLinks);
+setTimeout(()=>{ renderNodes(); }, 50);
+
+document.getElementById('exportBtn').onclick = ()=>{
+  copyToClipboard(document.getElementById('outline').textContent, {message:'outline copied'});
+};
+document.getElementById('submit').onclick = async ()=>{
+  await submitToClaude({
+    skill:'html-mind-map', kind:'mind-map-tree',
+    data:{ root: tree.label, tree },
+    version:1
+  });
+};
+</script>
+</body>
+</html>

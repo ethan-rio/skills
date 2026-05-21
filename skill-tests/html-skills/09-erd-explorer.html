@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aurora schema — ERD</title>
+<style>
+:root{
+  --bg:#f5f5f0; --panel:#fff; --rule:#dcd6c8; --ink:#1f2329; --mute:#67707d;
+  --pk:#0e7490; --fk:#a16207; --uniq:#7c3aed;
+  --mono:'JetBrains Mono', ui-monospace, monospace; --sans:Inter, system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13px;line-height:1.5}
+.wrap{max-width:1300px;margin:0 auto;padding:32px 22px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:18px;border-bottom:1px solid var(--rule);padding-bottom:14px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+h1{font-size:26px;margin:6px 0;font-weight:600;letter-spacing:-.01em}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--mute)}
+.legend .pk{color:var(--pk)} .legend .fk{color:var(--fk)} .legend .uq{color:var(--uniq)}
+.canvas{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px;overflow:auto}
+svg{display:block;min-width:1200px;width:100%;height:auto}
+.tab{font-family:var(--mono);font-size:12px;fill:var(--ink)}
+.btitle{font-family:var(--sans);font-weight:700;font-size:13px;fill:var(--ink)}
+.theadbg{fill:#0e7490}
+.theadtxt{fill:#fff;font-family:var(--sans);font-weight:600;font-size:13px}
+.col-name{font-family:var(--mono);font-size:11.5px}
+.col-type{font-family:var(--mono);font-size:11px;fill:var(--mute)}
+.row{cursor:default}
+.row:hover{filter:brightness(0.96)}
+.detail{margin-top:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:780px){.detail{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px}
+.card h3{margin:0 0 8px;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--rule);text-align:left;font-family:var(--mono)}
+th{color:var(--mute);font-weight:500;text-transform:uppercase;font-size:10.5px;letter-spacing:.08em}
+td.pk{color:var(--pk)} td.fk{color:var(--fk)} td.uq{color:var(--uniq)}
+footer{color:var(--mute);font-family:var(--mono);font-size:11px;margin-top:30px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--rule);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div>
+<div class="eyebrow">Database · Aurora core schema · postgres 15</div>
+<h1>Entity-relationship diagram</h1>
+</div>
+<div class="legend">
+<span class="pk">● PK · primary key</span>
+<span class="fk">● FK · foreign key</span>
+<span class="uq">● UQ · unique constraint</span>
+<span>→ relation arrow points to "owner"</span>
+</div>
+</header>
+
+<div class="canvas">
+<svg viewBox="0 0 1240 620" role="img" aria-label="Aurora schema ERD">
+<defs>
+  <marker id="one" viewBox="-1 -3 6 6" refX="0" refY="0" markerWidth="6" markerHeight="6" orient="auto">
+    <line x1="0" y1="-3" x2="0" y2="3" stroke="#1f2329" stroke-width="1.5"/>
+  </marker>
+  <marker id="many" viewBox="-1 -5 8 10" refX="6" refY="0" markerWidth="9" markerHeight="9" orient="auto">
+    <path d="M0,0 L6,-4 M0,0 L6,0 M0,0 L6,4" fill="none" stroke="#1f2329" stroke-width="1.5"/>
+  </marker>
+</defs>
+
+<!-- users -->
+<g class="row">
+<rect x="40" y="50" width="220" height="172" fill="#fff" stroke="#1f2329" rx="6"/>
+<rect x="40" y="50" width="220" height="28" class="theadbg" rx="6"/>
+<rect x="40" y="64" width="220" height="14" class="theadbg"/>
+<text x="52" y="69" class="theadtxt">users</text>
+<g transform="translate(52, 96)">
+<text class="col-name" fill="#0e7490">●</text><text x="14" class="col-name">id</text><text x="120" class="col-type">uuid</text>
+<text y="20" class="col-name" fill="#7c3aed">●</text><text x="14" y="20" class="col-name">email</text><text x="120" y="20" class="col-type">citext</text>
+<text y="40" class="col-name">·</text><text x="14" y="40" class="col-name">display_name</text><text x="120" y="40" class="col-type">text</text>
+<text y="60" class="col-name">·</text><text x="14" y="60" class="col-name">created_at</text><text x="120" y="60" class="col-type">timestamptz</text>
+<text y="80" class="col-name">·</text><text x="14" y="80" class="col-name">last_seen_at</text><text x="120" y="80" class="col-type">timestamptz</text>
+<text y="100" class="col-name">·</text><text x="14" y="100" class="col-name">plan</text><text x="120" y="100" class="col-type">user_plan</text>
+</g>
+</g>
+
+<!-- workspaces -->
+<g class="row">
+<rect x="340" y="50" width="240" height="138" fill="#fff" stroke="#1f2329" rx="6"/>
+<rect x="340" y="50" width="240" height="28" class="theadbg" rx="6"/>
+<rect x="340" y="64" width="240" height="14" class="theadbg"/>
+<text x="352" y="69" class="theadtxt">workspaces</text>
+<g transform="translate(352, 96)">
+<text class="col-name" fill="#0e7490">●</text><text x="14" class="col-name">id</text><text x="140" class="col-type">uuid</text>
+<text y="20" class="col-name">·</text><text x="14" y="20" class="col-name">name</text><text x="140" y="20" class="col-type">text</text>
+<text y="40" class="col-name" fill="#a16207">●</text><text x="14" y="40" class="col-name">owner_user_id</text><text x="140" y="40" class="col-type">uuid → users</text>
+<text y="60" class="col-name">·</text><text x="14" y="60" class="col-name">created_at</text><text x="140" y="60" class="col-type">timestamptz</text>
+</g>
+</g>
+
+<!-- memberships -->
+<g class="row">
+<rect x="660" y="50" width="240" height="172" fill="#fff" stroke="#1f2329" rx="6"/>
+<rect x="660" y="50" width="240" height="28" class="theadbg" rx="6"/>
+<rect x="660" y="64" width="240" height="14" class="theadbg"/>
+<text x="672" y="69" class="theadtxt">memberships</text>
+<g transform="translate(672, 96)">
+<text class="col-name" fill="#0e7490">●</text><text x="14" class="col-name">id</text><text x="140" class="col-type">uuid</text>
+<text y="20" class="col-name" fill="#a16207">●</text><text x="14" y="20" class="col-name">workspace_id</text><text x="140" y="20" class="col-type">uuid → ws</text>
+<text y="40" class="col-name" fill="#a16207">●</text><text x="14" y="40" class="col-name">user_id</text><text x="140" y="40" class="col-type">uuid → users</text>
+<text y="60" class="col-name">·</text><text x="14" y="60" class="col-name">role</text><text x="140" y="60" class="col-type">membership_role</text>
+<text y="80" class="col-name" fill="#7c3aed">●</text><text x="14" y="80" class="col-name">(ws,user)</text><text x="140" y="80" class="col-type">unique</text>
+<text y="100" class="col-name">·</text><text x="14" y="100" class="col-name">joined_at</text><text x="140" y="100" class="col-type">timestamptz</text>
+</g>
+</g>
+
+<!-- documents -->
+<g class="row">
+<rect x="980" y="50" width="220" height="172" fill="#fff" stroke="#1f2329" rx="6"/>
+<rect x="980" y="50" width="220" height="28" class="theadbg" rx="6"/>
+<rect x="980" y="64" width="220" height="14" class="theadbg"/>
+<text x="992" y="69" class="theadtxt">documents</text>
+<g transform="translate(992, 96)">
+<text class="col-name" fill="#0e7490">●</text><text x="14" class="col-name">id</text><text x="120" class="col-type">uuid</text>
+<text y="20" class="col-name" fill="#a16207">●</text><text x="14" y="20" class="col-name">workspace_id</text><text x="120" y="20" class="col-type">uuid → ws</text>
+<text y="40" class="col-name">·</text><text x="14" y="40" class="col-name">title</text><text x="120" y="40" class="col-type">text</text>
+<text y="60" class="col-name">·</text><text x="14" y="60" class="col-name">crdt_state</text><text x="120" y="60" class="col-type">bytea</text>
+<text y="80" class="col-name">·</text><text x="14" y="80" class="col-name">updated_at</text><text x="120" y="80" class="col-type">timestamptz</text>
+<text y="100" class="col-name">·</text><text x="14" y="100" class="col-name">deleted_at</text><text x="120" y="100" class="col-type">timestamptz?</text>
+</g>
+</g>
+
+<!-- shares -->
+<g class="row">
+<rect x="660" y="280" width="240" height="138" fill="#fff" stroke="#1f2329" rx="6"/>
+<rect x="660" y="280" width="240" height="28" class="theadbg" rx="6"/>
+<rect x="660" y="294" width="240" height="14" class="theadbg"/>
+<text x="672" y="299" class="theadtxt">shares</text>
+<g transform="translate(672, 326)">
+<text class="col-name" fill="#0e7490">●</text><text x="14" class="col-name">id</text><text x="140" class="col-type">uuid</text>
+<text y="20" class="col-name" fill="#a16207">●</text><text x="14" y="20" class="col-name">document_id</text><text x="140" y="20" class="col-type">uuid → docs</text>
+<text y="40" class="col-name" fill="#a16207">●</text><text x="14" y="40" class="col-name">user_id</text><text x="140" y="40" class="col-type">uuid → users</text>
+<text y="60" class="col-name">·</text><text x="14" y="60" class="col-name">role</text><text x="140" y="60" class="col-type">share_role</text>
+</g>
+</g>
+
+<!-- comments -->
+<g class="row">
+<rect x="980" y="280" width="220" height="172" fill="#fff" stroke="#1f2329" rx="6"/>
+<rect x="980" y="280" width="220" height="28" class="theadbg" rx="6"/>
+<rect x="980" y="294" width="220" height="14" class="theadbg"/>
+<text x="992" y="299" class="theadtxt">comments</text>
+<g transform="translate(992, 326)">
+<text class="col-name" fill="#0e7490">●</text><text x="14" class="col-name">id</text><text x="120" class="col-type">uuid</text>
+<text y="20" class="col-name" fill="#a16207">●</text><text x="14" y="20" class="col-name">document_id</text><text x="120" y="20" class="col-type">uuid → docs</text>
+<text y="40" class="col-name" fill="#a16207">●</text><text x="14" y="40" class="col-name">author_id</text><text x="120" y="40" class="col-type">uuid → users</text>
+<text y="60" class="col-name">·</text><text x="14" y="60" class="col-name">body</text><text x="120" y="60" class="col-type">text</text>
+<text y="80" class="col-name">·</text><text x="14" y="80" class="col-name">resolved_at</text><text x="120" y="80" class="col-type">timestamptz?</text>
+<text y="100" class="col-name">·</text><text x="14" y="100" class="col-name">created_at</text><text x="120" y="100" class="col-type">timestamptz</text>
+</g>
+</g>
+
+<!-- relations -->
+<g stroke="#1f2329" fill="none" stroke-width="1.4">
+<path d="M260,140 L340,120" marker-start="url(#many)" marker-end="url(#one)"/>
+<path d="M580,140 L660,140" marker-start="url(#one)" marker-end="url(#many)"/>
+<path d="M260,170 C400,210 540,210 660,180" marker-start="url(#many)" marker-end="url(#many)"/>
+<path d="M580,140 L980,140" marker-start="url(#one)" marker-end="url(#many)"/>
+<path d="M1090,222 L1090,280" marker-start="url(#one)" marker-end="url(#many)"/>
+<path d="M900,360 L980,360" marker-start="url(#many)" marker-end="url(#one)"/>
+</g>
+
+<!-- legend -->
+<g font-family="JetBrains Mono" font-size="11" fill="#67707d">
+<text x="40" y="500">— line ending: ┤ = "one"   ╳ = "many"</text>
+<text x="40" y="520">— follow arrow direction "from FK column to its referenced PK"</text>
+</g>
+</svg>
+</div>
+
+<div class="detail">
+<div class="card">
+<h3>users — schema sketch</h3>
+<table>
+<tr><th>column</th><th>type</th><th>flags</th></tr>
+<tr><td class="pk">id</td><td>uuid</td><td>PK · gen_random_uuid()</td></tr>
+<tr><td class="uq">email</td><td>citext</td><td>UNIQUE NOT NULL</td></tr>
+<tr><td>display_name</td><td>text</td><td>NOT NULL</td></tr>
+<tr><td>plan</td><td>user_plan</td><td>default 'free'</td></tr>
+<tr><td>last_seen_at</td><td>timestamptz</td><td>indexed for active-user queries</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>memberships — junction table</h3>
+<table>
+<tr><th>column</th><th>type</th><th>flags</th></tr>
+<tr><td class="pk">id</td><td>uuid</td><td>PK</td></tr>
+<tr><td class="fk">workspace_id</td><td>uuid</td><td>FK · cascade delete</td></tr>
+<tr><td class="fk">user_id</td><td>uuid</td><td>FK · cascade delete</td></tr>
+<tr><td>role</td><td>membership_role</td><td>'admin' | 'editor' | 'viewer'</td></tr>
+<tr><td class="uq">(workspace_id, user_id)</td><td>—</td><td>UNIQUE</td></tr>
+</table>
+</div>
+</div>
+
+<footer>
+<span>Last updated 2026-05-21 · introspected from migrations 0001–0089</span>
+<span>open questions: do we soft-delete users? plan billing rows live separately</span>
+</footer>
+</div>
+</body>
+</html>
