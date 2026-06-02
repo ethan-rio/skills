@@ -156,7 +156,21 @@ else
   log "      (pyproject.toml, Makefile, uv.lock, PR template) when reachable."
 fi
 
-# 3. Record opt-outs so future audits honour them.
+# 3. Personalise the project name (the template ships name = "dna-bne-project-template").
+#    Idempotent: only rewrites while the name is still the template default, so a
+#    user's real name is never clobbered on re-run.
+PYPROJECT="$TARGET/pyproject.toml"
+if [[ -f "$PYPROJECT" ]] && grep -q '^name = "dna-bne-project-template"' "$PYPROJECT"; then
+  # Derive a PEP 503-ish name from the target directory: lowercase, non-alnum → '-'.
+  proj="$(basename "$TARGET" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
+  [[ -z "$proj" ]] && proj="project"
+  act "set pyproject.toml name = \"$proj\" (was template default)"
+  if [[ $DRY_RUN -eq 0 ]]; then
+    sed -i "s/^name = \"dna-bne-project-template\"/name = \"$proj\"/" "$PYPROJECT"
+  fi
+fi
+
+# 4. Record opt-outs so future audits honour them.
 if [[ ${#SKIP[@]} -gt 0 ]]; then
   conf="$TARGET/.setup-env.toml"
   act "write .setup-env.toml (opt-outs)"

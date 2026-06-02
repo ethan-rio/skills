@@ -216,6 +216,12 @@ def check_tooling(root: Path, rep: Report) -> None:
                 "Adopt pyproject.toml from dna-bne-project-template")
         return
 
+    proj_name = data.get("project", {}).get("name", "")
+    is_template = proj_name == "dna-bne-project-template"
+    rep.add(cat, "Project name personalised", WARN if is_template else PASS,
+            f'name = "{proj_name}"' + (" (still the template default)" if is_template else ""),
+            "Rename the project in pyproject.toml to your repo" if is_template else "")
+
     declared = " ".join(str(v) for v in _all_dep_strings(data)).lower()
     for tool in REQUIRED_DEV_TOOLS:
         present = tool in declared

@@ -1,0 +1,133 @@
+"""Script to check notebook files for function definitions."""
+
+import argparse
+import ast
+import glob
+import json
+from pathlib import Path
+import sys
+
+
+def has_function(code: str) -> bool:
+    """Checks whether provided source code has a function in it.
+
+    Args:
+        code (str): The source code as a strig
+
+    Returns:
+        bool: True if source code contains a function and False otherwise
+
+    Raises:
+        SyntaxError: If the provided code has a syntax error
+    """
+    try:
+        tree = ast.parse(code)
+    except SyntaxError as syntax_error:
+        raise syntax_error
+    except Exception as e:
+        raise e
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            return True
+    return False
+
+
+def analyze_notebooks(notebook_paths: list[Path]) -> bool:
+    """Iterates over provided notebook paths and checks whether any notebook code cells contain function definitions.
+
+    Args:
+        notebook_paths (List[str]): A list of notebook file paths
+
+    Returns:
+        bool: True if any of the notebooks have a function in them or if there is any other error - returns False otherwise
+    """
+    raise_error = False
+    for notebook in notebook_paths:
+        print(f"notebook_analyser: Analysing {notebook}...")
+        with open(notebook, "r") as notebook_file:
+            notebook_contents = json.load(notebook_file)
+
+            has_function_flag = False
+            processing_error = False
+            for cell_id, cell in enumerate(notebook_contents["cells"]):
+                if cell["cell_type"] == "code":
+                    source_code = "".join(cell["source"])
+                    try:
+                        if has_function(source_code):
+                            print(
+                                f"notebook_analyser: {notebook} has function in cell number {cell_id}"
+                            )
+                            has_function_flag = True
+                            raise_error = True
+                    except SyntaxError:
+                        print(f"notebook_analyser: Skipping notebook {notebook}...")
+                        print(
+                            f"notebook_analyser: {notebook} has a syntax error in cell number {cell_id}\n{source_code[:50]}...",
+                            file=sys.stderr,
+                        )
+                        processing_error = True
+                        raise_error = True
+                        break
+                    except Exception as e:
+                        print(f"notebook_analyser: Skipping notebook {notebook}...")
+                        print(
+                            f"notebook_analyser: encountered unexpected error in {cell_id} in {notebook}: {e}",
+                            file=sys.stderr,
+                        )
+                        processing_error = True
+                        raise_error = True
+                        break
+
+            if not has_function_flag and not processing_error:
+                print(f"notebook_analyser: {notebook} has no functions in it :)")
+
+            print("")  # print new line
+
+    return raise_error
+
+
+def get_notebook_paths(path_list: list[str]) -> list[Path]:
+    """Iterates over provided file and directory paths to provide a list of noteobook filepaths.
+
+    Removes any repeated filepaths before returning the list.
+
+    Args:
+        path_list (List[str]): List of paths and directories to scan for notebook files.
+
+    Returns:
+        List of unique notebook filepaths found in the paths provided.
+    """
+    nb_path_list = []
+    for p in path_list:
+        path = Path(p)
+
+        if path.as_posix().endswith(".ipynb"):
+            nb_path_list.append(path)
+
+        if path.is_dir():
+            notebook_paths = glob.glob(f"{path}/**/*.ipynb", recursive=True)
+            nb_path_list.extend([Path(nb_path) for nb_path in notebook_paths])
+
+    return list(set(nb_path_list))
+
+
+if __name__ == "__main__":
+    # Initialize parser
+    parser = argparse.ArgumentParser(
+        description="Scan provided notebook files for defined functions"
+    )
+
+    parser.add_argument(
+        "nb_paths",
+        nargs="+",
+        type=str,
+        help="Paths or directories of notebooks to analyse.",
+    )
+    args = parser.parse_args()
+
+    nb_paths = get_notebook_paths(args.nb_paths)
+
+    contains_functions = analyze_notebooks(nb_paths)
+    if contains_functions:
+        exit(1)
