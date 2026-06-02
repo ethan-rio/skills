@@ -404,7 +404,33 @@ def check_gitignore(root: Path, rep: Report) -> None:
             "" if git_dir.exists() else "Run `git init` and set up a remote")
 
 
-CHECK_GROUPS = [check_environment, check_tooling, check_structure, check_gitignore]
+def check_docs_consistency(root: Path, rep: Report) -> None:
+    """Surface doc drift for the agent's sanitisation step (detect, don't fix).
+
+    If a component was opted out but the README still documents its directory,
+    flag it. The fix (pruning the tree, rewording prose) is the agent's
+    sanitisation job — judgment-laden, so not automated here. This check is the
+    deterministic backstop that verifies the agent actually did it.
+    """
+    cat = "Docs consistency"
+    readme = root / "README.md"
+    if not rep.disabled or not readme.is_file():
+        return
+    text = readme.read_text(encoding="utf-8", errors="ignore").lower()
+    # Directory token each optional component owns (mirrors the scaffold).
+    comp_dir = {"devcontainer": ".devcontainer", "docker": "docker",
+                "infrastructure": "infrastructure", "pipelines": "pipelines",
+                "notebooks": "notebooks", "models": "models", "github_pr": ".github"}
+    stale = sorted(d for k in rep.disabled
+                   if (d := comp_dir.get(k)) and re.search(rf"(^|\W){re.escape(d)}/", text, re.M))
+    rep.add(cat, "README matches selected components", PASS if not stale else WARN,
+            "no opted-out components referenced" if not stale
+            else f"README still references opted-out: {', '.join(stale)}",
+            "" if not stale else "Sanitise README: remove/reword the opted-out entries")
+
+
+CHECK_GROUPS = [check_environment, check_tooling, check_structure,
+                check_gitignore, check_docs_consistency]
 
 
 def build_report(root: Path) -> Report:

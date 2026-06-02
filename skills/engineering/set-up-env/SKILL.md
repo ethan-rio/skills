@@ -71,14 +71,35 @@ prose; query the script so the skill stays the source of truth.
    Idempotent; never overwrites existing files. If the template repo is
    unreachable, add `--no-clone` for a minimal skeleton.
 
-8. **Verify and report.** Re-run the audit:
+8. **Sanitise the resources you just created.** The scaffold copies the team
+   template verbatim, so the new files still carry template content that now
+   contradicts this repo's choices. Use judgment to make the created files
+   *honest* — this is your job, not a script's, because it spans mechanical
+   edits, prose, and placeholders together:
+   - **README.md** — the structure tree documents the *full* template layout.
+     Remove the entries for components the user opted out (e.g. drop the
+     `.devcontainer/`, `notebooks/`, `models/` blocks), and reword any prose /
+     setup links that reference them (e.g. the Dev Containers setup link if
+     dev containers were skipped). Replace the placeholder title/overview with
+     a one-line description of *this* project if you know it.
+   - **Other boilerplate** — `SECURITY.md`, `CONTRIBUTING.md`, `data/README.md`
+     carry template defaults. Leave genuine authoring (security contacts,
+     license holder, real project description) to the user, but fix anything
+     that is plainly *wrong* for this repo rather than merely unwritten.
+   - **Don't invent facts.** If you don't know the project's purpose, license
+     holder, or data source, leave a clearly-marked TODO rather than fabricate.
+   - Show the user a short list of what you sanitised and what you left as a
+     TODO for them.
+
+9. **Verify and report.** Re-run the audit — it is the deterministic backstop
+   that confirms your sanitisation actually landed:
    ```bash
    uv run scripts/audit.py <target>
    ```
-   Show the before/after delta. Opted-out components appear as `SKIP`, not
-   discrepancies. List remaining `WARN`/`FAIL` items needing manual work
-   (devcontainer content, real `pyproject.toml`/`Makefile`/`uv.lock` if stubs
-   were used, LICENSE/README content).
+   Show the before/after delta. Opted-out components appear as `SKIP`. The
+   `Docs consistency` check will WARN if the README still references an
+   opted-out component — if it does, your step 8 sanitisation missed something;
+   go fix it. List remaining `WARN`/`FAIL` items needing the user's manual work.
 
 ## Rules
 

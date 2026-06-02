@@ -158,7 +158,9 @@ fi
 
 # 3. Personalise the project name (the template ships name = "dna-bne-project-template").
 #    Idempotent: only rewrites while the name is still the template default, so a
-#    user's real name is never clobbered on re-run.
+#    user's real name is never clobbered on re-run. Kept in-script because it's
+#    zero-judgment (derive from dir name) and the audit verifies it. Broader
+#    placeholder/prose cleanup is left to the agent's sanitisation step (see SKILL.md).
 PYPROJECT="$TARGET/pyproject.toml"
 if [[ -f "$PYPROJECT" ]] && grep -q '^name = "dna-bne-project-template"' "$PYPROJECT"; then
   # Derive a PEP 503-ish name from the target directory: lowercase, non-alnum → '-'.

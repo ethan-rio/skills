@@ -19,7 +19,13 @@ Severity convention used by the audit:
 ## Deterministic vs. dynamic (the dividing line)
 
 Anything that must give the **same answer every run** lives in the scripts;
-only genuine **judgment and user choice** lives in the agent.
+genuine **judgment, user choice, and one-off cleanup** live in the agent. Rule
+of thumb: a script when drift would change *what gets built* or *how it's
+measured*; an agent instruction when it's cosmetic clean-up of just-created
+resources that mixes mechanical edits with prose and placeholders. (We tried a
+`prune_readme.py` for README cleanup and removed it — it could prune the
+structure tree but not honestly reword the surrounding prose, which is exactly
+the judgment a script shouldn't fake.)
 
 | Concern | Deterministic (scripts) | Dynamic (agent) |
 |---|---|---|
@@ -27,6 +33,8 @@ only genuine **judgment and user choice** lives in the agent.
 | Component registry + which are core vs optional | `audit.py --list-components` | |
 | **Detecting repo signals → recommending components** | `audit.py --recommend` | |
 | Create dirs, copy template, write `.setup-env.toml`, set project name | `scaffold.sh` | |
+| **Sanitise created files** (prune README tree, reword prose, placeholders) | | agent (step 8) |
+| Detect README still references an opted-out component | `audit.py` (Docs consistency) | |
 | *Which* components to actually include (the decision) | | user via `AskUserQuestion` |
 | Whether to `git init` a nested repo, fill boilerplate | | agent judgment |
 | Present plan, confirm, narrate before/after | | agent |
