@@ -37,13 +37,18 @@ prose; query the script so the skill stays the source of truth.
    one-line `description`. **Core** items (uv, ruff/mypy, src/tests, data policy)
    are never optional — don't offer to skip them.
 
-4. **Ask the user, adaptively.** Present the optional components as a **single
-   `AskUserQuestion` multi-select checklist** (checked = include). Pre-check each
-   to its `default`, but **reason from the repo first** and pre-uncheck what
-   clearly doesn't apply — e.g. no `.ipynb` anywhere → suggest skipping
-   `notebooks`; no cloud IaC → suggest skipping `infrastructure`; not a GitHub
-   remote → suggest skipping `github_pr`. Briefly say why you pre-set each
-   non-default. The user's answer is authoritative.
+4. **Ask the user, adaptively.** Present the optional components as
+   `AskUserQuestion` **multi-select** questions (selected = include).
+   **`AskUserQuestion` allows at most 4 options per question**, and there are
+   more than 4 optional components — so split them across **multiple multi-select
+   questions in a single `AskUserQuestion` call** (the tool takes up to 4
+   questions at once; group e.g. "infra/ops" and "project type"). Do **not** try
+   to put all components in one question — it will error.
+   **Reason from the repo first** and pre-select only what applies, leaving the
+   rest unselected — e.g. no `.ipynb` anywhere → don't pre-select `notebooks`;
+   no cloud IaC → don't pre-select `infrastructure`; not a GitHub remote → don't
+   pre-select `github_pr`. Briefly say why you pre-set each non-default. The
+   user's answer is authoritative.
 
 5. **Preview** with a dry run, passing `--skip <key>` for every unchecked
    component:

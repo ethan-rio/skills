@@ -1,0 +1,146 @@
+[project]
+name = "dna-bne-project-template"
+version = "0.1.0"
+description = "A python project using the uv tool"
+readme = "README.md"
+requires-python = ">=3.12.6"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+    "nbqa>=1.9.1",
+    "ruff>=0.13.2",
+]
+lint = []
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+# Same as Black.
+line-length = 100
+indent-width = 4
+
+# Minimum python version
+target-version = "py312"
+
+[tool.ruff.lint]
+
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = [
+    # flake8-docstring
+    "D",
+    # flake8-builtins
+    "A",
+    # flake8-annotations
+    "ANN",
+    # flake8-comprehensions
+    "C4",
+    # flake8-debugger
+    "T10",
+    # mccabe
+    "C90",
+    # pycodestyle
+    "E", "W",
+    # pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # ruff
+    "RUF",
+    # Cyclomatic complexity
+    "C901"
+]
+ignore = [
+    # LineTooLong
+    "E501",
+    # DoNotAssignLambda
+    "E731",
+    # TODO flake8-bandit errors are probably something to look out for in a production branch
+    "S",
+    # isort - isort is run manually
+    "I",
+    # flake8-2020
+    "YTT",
+    # pygrep-hooks
+    "PGH",
+    # flake8-bugbear
+    "B",
+    # tryceratops
+    "TRY"
+]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"from".msg = "Use full module imports only, not from-imports"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    # flake8-annotations
+    "ANN",
+]
+"*.ipynb" = [
+    # flake8-annotations
+    "ANN",
+    # flake8-docstring
+    "D",
+]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+
+force-single-line = false
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Format Python code within docstrings
+docstring-code-format = true

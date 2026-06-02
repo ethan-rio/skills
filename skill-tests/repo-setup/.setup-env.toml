@@ -1,0 +1,6 @@
+# Component selections for the set-up-env / check-setup-against-standards skills.
+# false = opted out (audit reports SKIP instead of a discrepancy).
+[components]
+devcontainer = false
+notebooks = false
+models = false
