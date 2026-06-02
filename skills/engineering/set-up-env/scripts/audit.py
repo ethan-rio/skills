@@ -93,6 +93,86 @@ COMPONENTS: dict[str, dict] = {
     },
 }
 
+# --- Deterministic recommendation engine ------------------------------------
+# Detecting which optional components a repo "wants" is MECHANICAL, so it lives
+# here (same answer every run) — not in agent-improvised `find`/`ls` calls. The
+# agent presents these recommendations; the user makes the final choice.
+#
+# Each detector returns (recommend, reason):
+#   recommend = True  -> a positive signal was found (pre-select it)
+#   recommend = False -> a clear negative signal (don't pre-select)
+#   recommend = None  -> no signal; fall back to the component's `default`
+# "No signal" is its own category on purpose: an empty repo must yield identical,
+# explainable output, never a coin-flip.
+
+# File-extension / path globs that signal a component is in use.
+SIGNAL_GLOBS = {
+    "docker": ["**/Dockerfile", "**/*.dockerfile", "**/docker-compose*.y*ml"],
+    "infrastructure": ["**/*.tf", "**/*.bicep", "**/*.cfn.y*ml",
+                       "**/cloudformation*.y*ml", "**/template.y*ml"],
+    "pipelines": ["**/azure-pipelines*.y*ml", ".github/workflows/*.y*ml",
+                  "**/*.pipeline.y*ml"],
+    "notebooks": ["**/*.ipynb"],
+    "models": ["**/*.pt", "**/*.pkl", "**/*.h5", "**/*.onnx", "**/*.joblib",
+               "**/*.safetensors"],
+}
+
+
+def _has_any(root: Path, globs: list[str]) -> bool:
+    for pat in globs:
+        for p in root.glob(pat):
+            if ".git/" in str(p.relative_to(root)).replace("\\", "/") + "/":
+                continue
+            return True
+    return False
+
+
+def recommend_components(root: Path) -> dict[str, dict]:
+    """Deterministically recommend include/skip per optional component."""
+    disabled = load_disabled(root)
+    has_git = (root / ".git").exists()
+    # GitHub remote detection from .git/config (deterministic, no network).
+    on_github = False
+    cfg = root / ".git" / "config"
+    if cfg.is_file():
+        on_github = "github.com" in cfg.read_text(encoding="utf-8", errors="ignore").lower()
+
+    out: dict[str, dict] = {}
+    for key, meta in COMPONENTS.items():
+        # A prior opt-out in .setup-env.toml always wins — honour the user.
+        if key in disabled:
+            out[key] = {"recommend": False, "reason": "previously opted out (.setup-env.toml)",
+                        "signal": "config"}
+            continue
+
+        rec: bool | None = None
+        reason = ""
+        if key in SIGNAL_GLOBS:
+            if _has_any(root, SIGNAL_GLOBS[key]):
+                rec, reason = True, f"found {meta['label'].lower()} files in the repo"
+            else:
+                rec, reason = False, f"no {meta['label'].lower()} files detected"
+        elif key == "github_pr":
+            if has_git and on_github:
+                rec, reason = True, "git remote is on GitHub"
+            elif has_git and not on_github:
+                rec, reason = False, "git remote is not GitHub"
+            else:
+                rec, reason = None, "no git remote yet"
+        elif key == "devcontainer":
+            # No reliable code signal; defer to the documented default.
+            rec, reason = None, "no signal — team baseline"
+
+        if rec is None:
+            rec = meta["default"]
+            reason = reason or "no signal — using default"
+            signal = "default"
+        else:
+            signal = "detected"
+        out[key] = {"recommend": rec, "reason": reason, "signal": signal}
+    return out
+
+
 # Core requirements (never skippable).
 REQUIRED_DEV_TOOLS = ["ruff", "mypy"]  # nbqa added only if notebooks enabled.
 CORE_DIRS = ["config", "data", "data/raw", "data/processed", "docs",
@@ -372,6 +452,25 @@ def list_components(fmt: str) -> str:
     return "\n".join(rows)
 
 
+def render_recommendations(root: Path, fmt: str) -> str:
+    recs = recommend_components(root)
+    if fmt == "json":
+        return json.dumps(
+            {"root": str(root),
+             "recommendations": {
+                 k: {**recs[k], "label": COMPONENTS[k]["label"],
+                     "description": COMPONENTS[k]["description"]}
+                 for k in COMPONENTS}}, indent=2)
+    rows = [f"Recommended components for: {root}",
+            "(deterministic from repo signals; the user decides)", ""]
+    for key, meta in COMPONENTS.items():
+        r = recs[key]
+        mark = "include" if r["recommend"] else "skip   "
+        tag = "" if r["signal"] == "detected" else f"  [{r['signal']}]"
+        rows.append(f"  {mark}  {meta['label']}{tag} — {r['reason']}")
+    return "\n".join(rows)
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Audit a repo against team standards.")
     ap.add_argument("path", nargs="?", default=".", help="Repo root (default: .)")
@@ -379,6 +478,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--quiet", action="store_true")
     ap.add_argument("--list-components", action="store_true",
                     help="Print the optional-component registry and exit.")
+    ap.add_argument("--recommend", action="store_true",
+                    help="Deterministically recommend components from repo signals and exit.")
     args = ap.parse_args(argv)
 
     if args.list_components:
@@ -389,6 +490,10 @@ def main(argv: list[str]) -> int:
     if not root.is_dir():
         print(f"error: not a directory: {root}", file=sys.stderr)
         return 3
+
+    if args.recommend:
+        print(render_recommendations(root, args.format))
+        return 0
 
     rep = build_report(root)
 

@@ -16,6 +16,28 @@ Severity convention used by the audit:
 - **SKIP** — an *optional* component the repo opted out of (recorded in
   `.setup-env.toml`). Reported transparently; never counted as pass or fail.
 
+## Deterministic vs. dynamic (the dividing line)
+
+Anything that must give the **same answer every run** lives in the scripts;
+only genuine **judgment and user choice** lives in the agent.
+
+| Concern | Deterministic (scripts) | Dynamic (agent) |
+|---|---|---|
+| Does a file / dir / config exist & meet the standard? | `audit.py` | |
+| Component registry + which are core vs optional | `audit.py --list-components` | |
+| **Detecting repo signals → recommending components** | `audit.py --recommend` | |
+| Create dirs, copy template, write `.setup-env.toml`, set project name | `scaffold.sh` | |
+| *Which* components to actually include (the decision) | | user via `AskUserQuestion` |
+| Whether to `git init` a nested repo, fill boilerplate | | agent judgment |
+| Present plan, confirm, narrate before/after | | agent |
+
+`--recommend` detection rules (mechanical, reproducible): `docker` ← Dockerfile /
+compose; `infrastructure` ← `*.tf`/`*.bicep`/CloudFormation; `pipelines` ←
+azure-pipelines / `.github/workflows`; `notebooks` ← `*.ipynb`; `models` ←
+`*.pt/.pkl/.h5/.onnx/.joblib/.safetensors`; `github_pr` ← git remote on GitHub.
+No signal → the component's documented `default`. A prior `.setup-env.toml`
+opt-out always wins.
+
 ## Core vs. optional components
 
 Not every team uses every component (e.g. some devs don't use dev containers).

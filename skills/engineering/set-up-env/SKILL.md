@@ -29,26 +29,28 @@ prose; query the script so the skill stays the source of truth.
    Parse the JSON. Note every `FAIL` and `WARN`, and any existing `disabled`
    components (a prior `.setup-env.toml`) — default the checklist to those.
 
-3. **Discover the optional components** the user gets to choose:
+3. **Get the deterministic component recommendation.** Do **not** hand-roll
+   `find`/`ls` scans to guess which components apply — that drifts run to run.
+   The script does the detection mechanically and reproducibly:
    ```bash
-   uv run scripts/audit.py --list-components --format json
+   uv run scripts/audit.py <target> --recommend --format json
    ```
-   This returns each optional component's `key`, `label`, `default`, and a
-   one-line `description`. **Core** items (uv, ruff/mypy, src/tests, data policy)
-   are never optional — don't offer to skip them.
+   For each optional component this returns `recommend` (true/false), a `reason`,
+   and a `signal` (`detected` = found real files / git remote; `default` = no
+   signal, fell back to the team baseline; `config` = honouring a prior
+   `.setup-env.toml`). **Core** items (uv, ruff/mypy, src/tests, data policy) are
+   never optional — don't offer to skip them.
 
 4. **Ask the user, adaptively.** Present the optional components as
-   `AskUserQuestion` **multi-select** questions (selected = include).
+   `AskUserQuestion` **multi-select** questions (selected = include), seeded by
+   step 3's recommendation — select the ones with `recommend: true`, and quote
+   the `reason` so the user sees *why*. You are presenting the script's verdict,
+   not inventing your own; the user's answer is the final authority.
    **`AskUserQuestion` allows at most 4 options per question**, and there are
    more than 4 optional components — so split them across **multiple multi-select
    questions in a single `AskUserQuestion` call** (the tool takes up to 4
    questions at once; group e.g. "infra/ops" and "project type"). Do **not** try
    to put all components in one question — it will error.
-   **Reason from the repo first** and pre-select only what applies, leaving the
-   rest unselected — e.g. no `.ipynb` anywhere → don't pre-select `notebooks`;
-   no cloud IaC → don't pre-select `infrastructure`; not a GitHub remote → don't
-   pre-select `github_pr`. Briefly say why you pre-set each non-default. The
-   user's answer is authoritative.
 
 5. **Preview** with a dry run, passing `--skip <key>` for every unchecked
    component:
