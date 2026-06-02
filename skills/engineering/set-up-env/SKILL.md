@@ -1,6 +1,6 @@
 ---
 name: set-up-env
-description: Set up or scaffold a repository to the AI Services / BNE Data Engineering standards — dev container, uv + uv.lock, ruff/mypy/nbqa code-quality config, the required folder structure, data-directory .gitignore policy, and PR template. Use when the user runs /set-up-env, starts a new Rio data/AI project, onboards an existing repo to team standards, or asks to "set up the environment" / "scaffold this repo" / "make this repo compliant".
+description: Set up or scaffold a repository to the AI Services / BNE Data Engineering standards — uv + uv.lock, ruff/mypy code-quality config, folder structure, data-directory .gitignore policy, and optional components (dev container, docker, notebooks, infrastructure, CI/CD, models, PR template) that the agent asks the user about. Use when the user runs /set-up-env, starts a new Rio data/AI project, onboards an existing repo to team standards, or asks to "set up the environment" / "scaffold this repo" / "make this repo compliant".
 disable-model-invocation: true
 allowed-tools: Bash(uv run*), Bash(bash*), Bash(git clone*), Bash(git init*), Read, Edit, Write
 ---
@@ -9,11 +9,13 @@ allowed-tools: Bash(uv run*), Bash(bash*), Bash(git clone*), Bash(git init*), Re
 
 Brings a repository into line with the team's **Developer Guidelines** (see
 [STANDARDS.md](STANDARDS.md)). This skill **mutates the repo**, so it only runs
-when the user invokes it explicitly, and it **always audits and shows a plan
-before writing anything**.
+when the user invokes it explicitly, **adapts to which components the user wants**,
+and **always shows a plan before writing anything**.
 
-The standard is encoded in `scripts/audit.py` (the same checker the
-`check-setup-against-standards` skill uses) and applied by `scripts/scaffold.sh`.
+The standard — including which components are optional — is encoded in
+`scripts/audit.py` (the same checker `check-setup-against-standards` uses) and
+applied by `scripts/scaffold.sh`. Don't hardcode the component list from this
+prose; query the script so the skill stays the source of truth.
 
 ## Workflow
 
@@ -24,40 +26,63 @@ The standard is encoded in `scripts/audit.py` (the same checker the
    ```bash
    uv run scripts/audit.py <target> --format json
    ```
-   Parse the JSON. Note every `FAIL` and `WARN`.
+   Parse the JSON. Note every `FAIL` and `WARN`, and any existing `disabled`
+   components (a prior `.setup-env.toml`) — default the checklist to those.
 
-3. **Preview the changes** with a dry run:
+3. **Discover the optional components** the user gets to choose:
    ```bash
-   bash scripts/scaffold.sh --target <target> --dry-run
+   uv run scripts/audit.py --list-components --format json
+   ```
+   This returns each optional component's `key`, `label`, `default`, and a
+   one-line `description`. **Core** items (uv, ruff/mypy, src/tests, data policy)
+   are never optional — don't offer to skip them.
+
+4. **Ask the user, adaptively.** Present the optional components as a **single
+   `AskUserQuestion` multi-select checklist** (checked = include). Pre-check each
+   to its `default`, but **reason from the repo first** and pre-uncheck what
+   clearly doesn't apply — e.g. no `.ipynb` anywhere → suggest skipping
+   `notebooks`; no cloud IaC → suggest skipping `infrastructure`; not a GitHub
+   remote → suggest skipping `github_pr`. Briefly say why you pre-set each
+   non-default. The user's answer is authoritative.
+
+5. **Preview** with a dry run, passing `--skip <key>` for every unchecked
+   component:
+   ```bash
+   bash scripts/scaffold.sh --target <target> --dry-run --skip devcontainer --skip notebooks
    ```
 
-4. **Show the plan and get explicit confirmation.** Summarise what will be
-   created (dirs, files, where they come from — template clone vs. stubs) and
-   what the audit can't fix automatically (e.g. you must populate the empty
-   `devcontainer.json` from `demo-devcontainer-analytics`). **Wait for the user
-   to say go.** Do not write before confirmation.
+6. **Show the plan and get explicit confirmation.** Summarise what will be
+   created, what's being skipped (and that the skips get recorded in
+   `.setup-env.toml` so future audits won't flag them), and what you can't fix
+   automatically (e.g. populating an empty `devcontainer.json` from
+   `demo-devcontainer-analytics`). **Wait for the user to say go.**
 
-5. **Apply** (only after confirmation):
+7. **Apply** (only after confirmation), same `--skip` flags:
    ```bash
-   bash scripts/scaffold.sh --target <target>
+   bash scripts/scaffold.sh --target <target> --skip devcontainer --skip notebooks
    ```
-   The script is idempotent and never overwrites existing files. If the team
-   template repo is unreachable, add `--no-clone` to build a minimal skeleton.
+   Idempotent; never overwrites existing files. If the template repo is
+   unreachable, add `--no-clone` for a minimal skeleton.
 
-6. **Verify and report.** Re-run the audit:
+8. **Verify and report.** Re-run the audit:
    ```bash
    uv run scripts/audit.py <target>
    ```
-   Show the before/after delta. List remaining `WARN`/`FAIL` items the user must
-   handle manually (devcontainer content, real `pyproject.toml`/`Makefile`/`uv.lock`
-   if stubs were used, LICENSE choice, README content).
+   Show the before/after delta. Opted-out components appear as `SKIP`, not
+   discrepancies. List remaining `WARN`/`FAIL` items needing manual work
+   (devcontainer content, real `pyproject.toml`/`Makefile`/`uv.lock` if stubs
+   were used, LICENSE/README content).
 
 ## Rules
 
+- **Adapt, don't dictate.** Always run step 3–4. Never scaffold optional
+  components without asking, and never skip a **core** component.
+- **Honour prior choices.** If `.setup-env.toml` already opts something out,
+  carry it into the checklist defaults rather than silently re-enabling it.
 - **Never overwrite.** The scaffold only fills gaps. If a file exists, leave it.
 - **Never invent compliance.** If a stub can't satisfy a hard rule (e.g. no real
   `pyproject.toml` without the template), say so plainly — don't fake a PASS.
-- **Confirmation is mandatory** before step 5. This skill is opt-in by design.
+- **Confirmation is mandatory** before step 7. This skill is opt-in by design.
 - Run scripts from this skill's directory so relative paths resolve. The scripts
   use `uv run` (PEP 723 inline metadata) — no separate install needed.
 

@@ -13,6 +13,30 @@ Severity convention used by the audit:
 - **FAIL** — a hard standard is unmet (blocks "compliant").
 - **WARN** — recommended but context-dependent, or a placeholder needing content.
 - **PASS** — meets the standard.
+- **SKIP** — an *optional* component the repo opted out of (recorded in
+  `.setup-env.toml`). Reported transparently; never counted as pass or fail.
+
+## Core vs. optional components
+
+Not every team uses every component (e.g. some devs don't use dev containers).
+`set-up-env` asks the user which optional components to include; the choice is
+saved to `.setup-env.toml` and honoured by both skills across sessions.
+`audit.py --list-components` is the canonical registry.
+
+- **Core (never skippable):** uv + `pyproject.toml` + `uv.lock`, ruff + mypy,
+  `src/ tests/ docs/ config/ scripts/ data/`, the data `.gitignore` policy + a
+  sample file, and `README/SECURITY/CONTRIBUTING/LICENSE/Makefile/.env.sample`.
+- **Optional (agent asks):** `devcontainer`, `docker`, `infrastructure`,
+  `pipelines`, `notebooks` (which also gates the **nbqa** tool), `models`,
+  `github_pr`.
+
+`.setup-env.toml` format:
+
+```toml
+[components]
+devcontainer = false   # opted out → audit reports SKIP, scaffold won't create it
+notebooks = false      # also drops the nbqa tooling requirement
+```
 
 ---
 

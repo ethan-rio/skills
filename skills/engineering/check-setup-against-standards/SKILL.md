@@ -41,7 +41,15 @@ This skill shares its checker and canonical standard with `set-up-env`:
   missing dev tool, unpinned `requirements.txt`). Blocks "compliant".
 - **WARN** — recommended/context-dependent: a missing scaffoldable dir/file, an
   empty `devcontainer.json` placeholder, line-length ≠ 100, no remote.
+- **SKIP** — an optional component the repo opted out of via `.setup-env.toml`
+  (e.g. a project that doesn't use dev containers). Report these as
+  *intentionally excluded*, not as gaps. The audit prints an `Opted out:` line
+  listing them. Exit code ignores SKIPs.
 - Exit code mirrors severity: `0` clean, `1` warnings only, `2` at least one fail.
+
+If the user disputes a SKIP ("why isn't it checking my dev container?"), the
+answer is the repo's `.setup-env.toml` — they can re-enable it by re-running
+`/set-up-env` and re-checking that component.
 
 ## Scope
 
