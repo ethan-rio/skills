@@ -40,8 +40,10 @@ agents).
 
 ### Engineering
 
+- **[check-setup-against-standards](./skills/engineering/check-setup-against-standards/SKILL.md)** — Read-only audit of a repo against the AI Services / BNE Data Engineering standards; reports gaps with remediation.
 - **[drawio-aws-diagrams](./skills/engineering/drawio-aws-diagrams/SKILL.md)** — Author professional AWS architecture diagrams as `.drawio` XML on the first attempt.
 - **[prove-it](./skills/engineering/prove-it/SKILL.md)** — Test your understanding of the current project through adaptive questioning.
+- **[set-up-env](./skills/engineering/set-up-env/SKILL.md)** — Scaffold a repo to the AI Services / BNE Data Engineering standards (dev container, uv, code-quality tooling, folder structure, PR template), auditing and confirming before it writes.
 
 _Vendored from [mattpocock/skills](https://github.com/mattpocock/skills):_
 

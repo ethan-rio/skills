@@ -7,11 +7,13 @@
       "name": "engineering",
       "source": "./",
       "skills": [
+        "./engineering/check-setup-against-standards",
         "./engineering/diagnose",
         "./engineering/drawio-aws-diagrams",
         "./engineering/improve-codebase-architecture",
         "./engineering/prototype",
         "./engineering/prove-it",
+        "./engineering/set-up-env",
         "./engineering/tdd",
         "./engineering/zoom-out"
       ]
